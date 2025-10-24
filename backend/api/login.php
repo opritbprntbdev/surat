@@ -1,6 +1,5 @@
 <?php
 session_start();
-require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/database.php';
 
 header('Content-Type: application/json; charset=utf-8');
@@ -20,6 +19,7 @@ if ($username === '' || $password === '') {
     exit;
 }
 
+// Cek user di database surat_app, tabel user, password MD5
 $db = Database::getInstance();
 $stmt = $db->prepare("SELECT id, username, password, nama_lengkap, role, divisi_id, status FROM user WHERE username = ? AND status = 'AKTIF' LIMIT 1");
 $stmt->bind_param('s', $username);
@@ -32,13 +32,11 @@ if (!$user) {
     exit;
 }
 
-// Password pakai MD5 seperti di SQL insert awal
 if (md5($password) !== $user['password']) {
     echo json_encode(['success' => false, 'error' => 'Password salah']);
     exit;
 }
 
-// Login sukses, set session
 $_SESSION['user_id'] = $user['id'];
 $_SESSION['username'] = $user['username'];
 $_SESSION['nama_lengkap'] = $user['nama_lengkap'];
@@ -55,3 +53,4 @@ echo json_encode([
         'divisi_id' => $user['divisi_id']
     ]
 ]);
+?>

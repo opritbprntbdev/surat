@@ -13,7 +13,7 @@ class Database
     private const HOST = 'localhost';
     private const USER = 'root';
     private const PASS = ''; // Kosong untuk WAMP default
-    private const NAME = 'gmail_clone';
+    private const NAME = 'surat_app';
     private const CHARSET = 'utf8mb4';
 
     private function __construct()

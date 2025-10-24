@@ -28,7 +28,6 @@ document.getElementById('login-btn').onclick = async function() {
     }
 };
 
-// Enter key
 document.getElementById('password').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') document.getElementById('login-btn').click();
 });

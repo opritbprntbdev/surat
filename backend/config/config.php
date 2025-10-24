@@ -28,7 +28,7 @@ class Config
 {
     // Database settings
     public const DB_HOST = 'localhost';
-    public const DB_NAME = 'gmail_clone';
+    public const DB_NAME = 'surat_app';
     public const DB_USER = 'root';
     public const DB_PASS = '';
 
