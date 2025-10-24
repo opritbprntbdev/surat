@@ -1,0 +1,36 @@
+# Log files
+*.log
+surat/backend/logs/*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# PHP
+vendor/
+composer.lock
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+
+# Upload directories
+uploads/
+attachments/
+
+# Cache
+cache/
+*.cache

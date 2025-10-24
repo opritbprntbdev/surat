@@ -439,14 +439,15 @@ class EmailFunctions
     {
         foreach ($attachments as $attachment) {
             $sql = "INSERT INTO email_attachments (
-                        email_id, name, size, type, file_path, created_at
-                    ) VALUES (?, ?, ?, ?, ?, ?)";
+                        email_id, filename, original_filename, file_size, mime_type, file_path, created_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
             Database::query($sql, [
                 $emailId,
-                $attachment['name'],
-                $attachment['size'],
-                $attachment['type'],
+                $attachment['filename'] ?? $attachment['name'] ?? '',
+                $attachment['original_filename'] ?? $attachment['name'] ?? '',
+                $attachment['file_size'] ?? $attachment['size'] ?? 0,
+                $attachment['mime_type'] ?? $attachment['type'] ?? 'application/octet-stream',
                 $attachment['file_path'] ?? null,
                 getCurrentTimestamp()
             ]);
