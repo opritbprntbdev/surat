@@ -96,6 +96,28 @@ const App = {
     }
 };
 
+// ... (kode App yang sudah ada) ...
+
 document.addEventListener('DOMContentLoaded', () => {
     App.init();
+
+    // LOGIKA BARU UNTUK DROPDOWN
+    const avatarBtn = Utils.$('#user-avatar-btn');
+    const dropdown = Utils.$('#user-dropdown');
+
+    if (avatarBtn && dropdown) {
+        avatarBtn.addEventListener('click', (event) => {
+            event.stopPropagation(); // Mencegah event "klik di luar" tertrigger
+            dropdown.classList.toggle('show');
+            dropdown.classList.toggle('hidden', !dropdown.classList.contains('show'));
+        });
+
+        // Menutup dropdown jika user mengklik di luar area dropdown
+        window.addEventListener('click', (event) => {
+            if (!dropdown.contains(event.target) && !avatarBtn.contains(event.target)) {
+                dropdown.classList.remove('show');
+                dropdown.classList.add('hidden');
+            }
+        });
+    }
 });
