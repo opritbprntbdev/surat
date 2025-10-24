@@ -14,6 +14,7 @@ class Database
     private const USER = 'root';
     private const PASS = '';
     private const NAME = 'surat_app';
+    private const PORT = 3308;
     private const CHARSET = 'utf8mb4';
 
     private function __construct()
@@ -25,7 +26,8 @@ class Database
                 self::HOST,
                 self::USER,
                 self::PASS,
-                self::NAME
+                self::NAME,
+                self::PORT
             );
 
             $this->connection->set_charset(self::CHARSET);

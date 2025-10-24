@@ -30,10 +30,11 @@ class Config
     public const DB_HOST = 'localhost';
     public const DB_NAME = 'surat_app';
     public const DB_USER = 'root';
+    private const PORT = 3308;
     public const DB_PASS = '';
 
     // Application settings
-    public const APP_NAME = 'Gmail Clone';
+    public const APP_NAME = 'surat_app';
     public const APP_VERSION = '1.0.0';
     public const APP_URL = 'http://localhost';
 
@@ -43,7 +44,7 @@ class Config
 
     // Email settings
     public const EMAIL_FROM = 'noreply@gmailclone.com';
-    public const EMAIL_FROM_NAME = 'Gmail Clone';
+    public const EMAIL_FROM_NAME = 'surat_app';
 
     // File upload settings
     public const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
