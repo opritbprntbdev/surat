@@ -118,10 +118,12 @@ function getRequestData(): array
             errorResponse('Invalid JSON data: ' . json_last_error_msg(), 400);
         }
 
-        return $data ?? [];
+        // Merge with GET parameters
+        return array_merge($_GET, $data ?? []);
     }
 
-    return $_POST;
+    // Merge POST and GET parameters
+    return array_merge($_GET, $_POST);
 }
 
 function validateRequired(array $data, array $requiredFields): array
