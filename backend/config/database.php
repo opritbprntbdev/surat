@@ -6,7 +6,7 @@
 
 class Database
 {
-    private static ?mysqli $instance = null;
+    private static ?Database $instance = null; // FIX: Ubah jadi ?Database, bukan ?mysqli
     private mysqli $connection;
 
     // Database configuration
@@ -46,7 +46,6 @@ class Database
         if (self::$instance === null) {
             self::$instance = new self();
         }
-
         return self::$instance->connection;
     }
 
