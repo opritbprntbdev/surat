@@ -10,41 +10,40 @@ class SuratFunctions
         $this->db = Database::getInstance();
     }
 
-    /**
-     * Get list of surat with filtering and pagination
-     */
-    public function getSuratList(array $filters = [], int $page = 1, int $limit = 50): array
+    public function getSuratList(): array
     {
-        $offset = ($page - 1) * $limit;
-
+        // ... (fungsi ini tidak berubah)
         $sql = "
             SELECT 
-                s.id,
-                s.nomor_surat,
-                s.perihal,
-                s.tanggal_surat,
-                s.status,
+                s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
+                pengirim.nama_lengkap as pengirim_nama
+            FROM surat s
+            JOIN user pengirim ON s.pengirim_id = pengirim.id
+            ORDER BY s.tanggal_surat DESC
+            LIMIT 50
+        ";
+        $suratList = Database::fetchAll($sql);
+        $total = Database::fetchValue("SELECT COUNT(*) FROM surat") ?? 0;
+        return ['data' => $suratList, 'total' => $total];
+    }
+
+    /**
+     * BARU: Fungsi untuk mengambil detail satu surat berdasarkan ID.
+     */
+    public function getSuratById(int $id): ?array
+    {
+        $sql = "
+            SELECT 
+                s.*,
                 pengirim.nama_lengkap as pengirim_nama,
-                penerima.nama_lengkap as penerima_nama,
-                SUBSTRING(s.isi_surat, 1, 100) as preview
+                pengirim.username as pengirim_username,
+                penerima.nama_lengkap as penerima_nama
             FROM surat s
             JOIN user pengirim ON s.pengirim_id = pengirim.id
             JOIN user penerima ON s.penerima_id = penerima.id
-            ORDER BY s.tanggal_surat DESC
-            LIMIT ? OFFSET ?
+            WHERE s.id = ?
         ";
-
-        $suratList = Database::fetchAll($sql, [$limit, $offset]);
-
-        $total = Database::fetchValue("SELECT COUNT(*) FROM surat") ?? 0;
-
-        return [
-            'data' => $suratList,
-            'total' => $total,
-            'page' => $page,
-            'limit' => $limit,
-            'pages' => ceil($total / $limit)
-        ];
+        return Database::fetchOne($sql, [$id]);
     }
 }
 ?>

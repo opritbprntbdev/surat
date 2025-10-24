@@ -1,9 +1,8 @@
 <?php
 session_start();
-// Proteksi: jika belum login, tolak akses
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
-    echo json_encode(['success' => false, 'error' => 'Akses ditolak, silakan login ulang.']);
+    echo json_encode(['success' => false, 'error' => 'Akses ditolak.']);
     exit;
 }
 
@@ -13,19 +12,23 @@ require_once __DIR__ . '/../function/surat_function.php';
 try {
     $suratFunctions = new SuratFunctions();
 
-    // Hanya handle GET request untuk daftar surat
-    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-        $page = (int) ($_GET['page'] ?? 1);
-        $limit = (int) ($_GET['limit'] ?? 50);
-
-        $result = $suratFunctions->getSuratList([], $page, $limit);
-
-        successResponse($result);
+    // Cek apakah ada parameter 'id' di URL
+    if (isset($_GET['id'])) {
+        $id = (int) $_GET['id'];
+        $surat = $suratFunctions->getSuratById($id);
+        if ($surat) {
+            successResponse($surat);
+        } else {
+            errorResponse('Surat tidak ditemukan', 404);
+        }
     } else {
-        errorResponse('Method not allowed', 405);
+        // Jika tidak ada 'id', kembalikan daftar surat
+        $result = $suratFunctions->getSuratList();
+        successResponse($result);
     }
 
 } catch (Exception $e) {
-    errorResponse('Internal server error: ' . $e->getMessage(), 500);
+    error_log('Error di surat.php: ' . $e->getMessage());
+    errorResponse('Terjadi kesalahan pada server.', 500);
 }
 ?>

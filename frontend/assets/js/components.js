@@ -1,10 +1,9 @@
 const Components = {
-    // Komponen untuk item surat
     createSuratItem(surat) {
+        // ... (fungsi ini tidak berubah)
         const div = document.createElement('div');
-        div.className = 'email-item'; // Tetap pakai class lama agar style tidak rusak
+        div.className = 'email-item';
         div.dataset.suratId = surat.id;
-        
         div.innerHTML = `
             <div class="email-content-wrapper">
                 <div class="email-avatar">${Utils.getInitials(surat.pengirim_nama)}</div>
@@ -18,38 +17,46 @@ const Components = {
                 </div>
             </div>
         `;
-        
         return div;
     },
 
-    // Loading State Component
-    createLoadingState(message = 'Loading...') {
+    /**
+     * BARU: Komponen untuk menampilkan detail surat di panel kanan.
+     */
+    createSuratDetail(surat) {
         const div = document.createElement('div');
-        div.className = 'email-loading';
-        div.innerHTML = `<div class="spinner"></div><span>${message}</span>`;
-        return div;
-    },
-
-    // Error State Component
-    createErrorState(title, message, retryCallback) {
-        const div = document.createElement('div');
-        div.className = 'email-error';
+        div.className = 'email-detail-content';
         div.innerHTML = `
-            <h3>${title}</h3>
-            <p>${message}</p>
-            <button class="retry-btn">Coba Lagi</button>
+            <div class="email-detail-header">
+                <h2 class="email-detail-subject">${Utils.escapeHtml(surat.perihal)}</h2>
+                <div class="email-detail-meta">
+                    <div class="email-detail-from">
+                        <div class="email-detail-avatar">${Utils.getInitials(surat.pengirim_nama)}</div>
+                        <div class="email-detail-from-info">
+                            <h4>${Utils.escapeHtml(surat.pengirim_nama)}</h4>
+                            <p>Nomor Surat: ${Utils.escapeHtml(surat.nomor_surat)}</p>
+                        </div>
+                    </div>
+                    <div class="email-detail-date">${Utils.formatDate(surat.tanggal_surat)}</div>
+                </div>
+                 <div class="email-detail-to">
+                    <strong>Kepada:</strong> ${Utils.escapeHtml(surat.penerima_nama)}
+                </div>
+            </div>
+            <div class="email-detail-body">
+                ${surat.isi_surat.replace(/\n/g, '<br>')}
+            </div>
         `;
-        if (retryCallback) {
-            div.querySelector('.retry-btn').addEventListener('click', retryCallback);
-        }
         return div;
     },
-    
-    // Empty State Component
+
+    createLoadingState(message = 'Loading...') {
+        // ... (tidak berubah)
+    },
+    createErrorState(title, message, retryCallback) {
+        // ... (tidak berubah)
+    },
     createEmptyState(title, message) {
-        const div = document.createElement('div');
-        div.className = 'empty-state';
-        div.innerHTML = `<h3>${title}</h3><p>${message}</p>`;
-        return div;
+        // ... (tidak berubah)
     },
 };

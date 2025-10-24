@@ -1,0 +1,25 @@
+[24-Oct-2025 15:26:18 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method Database::fetchOne() in C:\wamp64\www\surat\backend\function\surat_function.php:46
+Stack trace:
+#0 C:\wamp64\www\surat\backend\api\surat.php(18): SuratFunctions->getSuratById(3)
+#1 {main}
+  thrown in C:\wamp64\www\surat\backend\function\surat_function.php on line 46
+[24-Oct-2025 15:26:48 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method Database::fetchOne() in C:\wamp64\www\surat\backend\function\surat_function.php:46
+Stack trace:
+#0 C:\wamp64\www\surat\backend\api\surat.php(18): SuratFunctions->getSuratById(2)
+#1 {main}
+  thrown in C:\wamp64\www\surat\backend\function\surat_function.php on line 46
+[24-Oct-2025 15:27:00 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method Database::fetchOne() in C:\wamp64\www\surat\backend\function\surat_function.php:46
+Stack trace:
+#0 C:\wamp64\www\surat\backend\api\surat.php(18): SuratFunctions->getSuratById(1)
+#1 {main}
+  thrown in C:\wamp64\www\surat\backend\function\surat_function.php on line 46
+[24-Oct-2025 15:27:02 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method Database::fetchOne() in C:\wamp64\www\surat\backend\function\surat_function.php:46
+Stack trace:
+#0 C:\wamp64\www\surat\backend\api\surat.php(18): SuratFunctions->getSuratById(2)
+#1 {main}
+  thrown in C:\wamp64\www\surat\backend\function\surat_function.php on line 46
+[24-Oct-2025 15:27:02 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method Database::fetchOne() in C:\wamp64\www\surat\backend\function\surat_function.php:46
+Stack trace:
+#0 C:\wamp64\www\surat\backend\api\surat.php(18): SuratFunctions->getSuratById(3)
+#1 {main}
+  thrown in C:\wamp64\www\surat\backend\function\surat_function.php on line 46
