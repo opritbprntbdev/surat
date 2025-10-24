@@ -23,20 +23,36 @@
             </div>
         </div>
         <div class="header-right">
-            <div class="user-avatar" title="<?php echo $nama_user; ?>">
-                <?php echo $initial_user; ?>
+            <!-- STRUKTUR DROPDOWN YANG BENAR -->
+            <div class="user-menu-container">
+                <div class="user-avatar" id="user-avatar-btn" title="<?php echo $nama_user; ?>">
+                    <?php echo $initial_user; ?>
+                </div>
+                <!-- Dropdown Menu -->
+                <div id="user-dropdown" class="user-dropdown">
+                    <div class="dropdown-header">
+                        <div class="dropdown-avatar"><?php echo $initial_user; ?></div>
+                        <div class="dropdown-user-info">
+                            <strong><?php echo $nama_user; ?></strong>
+                            <span><?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                        </div>
+                    </div>
+                    <a href="../backend/api/logout.php" class="dropdown-item">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                            </path>
+                        </svg>
+                        <span>Logout</span>
+                    </a>
+                </div>
             </div>
         </div>
     </header>
 
     <!-- Area Konten Surat -->
     <div class="email-content">
-        <!-- Panel Kiri: Daftar Surat -->
-        <div class="email-list" id="email-list">
-            <!-- Daftar surat akan dimuat oleh JavaScript -->
-        </div>
-
-        <!-- Panel Kanan: Detail Surat -->
+        <div class="email-list" id="email-list"></div>
         <div class="email-detail" id="email-detail">
             <div class="email-detail-placeholder">
                 <p>Pilih surat untuk dibaca</p>
