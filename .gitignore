@@ -1,7 +1,10 @@
 # Log files
 *.log
-surat/backend/logs/*.log
 logs/
+!.gitkeep
+
+# Backend logs (but keep directory structure)
+surat/backend/logs/*.log
 
 # Temporary files
 *.tmp
