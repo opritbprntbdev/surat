@@ -1,0 +1,120 @@
+-- ------------------------------------------------------------
+--  DATABASE: SURAT APP
+--  Struktur final sesuai flow Divisi Umum sebagai pusat alur
+--  PHP 8.1 + MySQLi compatible
+-- ------------------------------------------------------------
+
+CREATE DATABASE IF NOT EXISTS surat_app CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE surat_app;
+
+-- ============================================================
+-- 1. TABEL USER
+-- ============================================================
+CREATE TABLE user (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(100) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  nama_lengkap VARCHAR(150) NOT NULL,
+  role ENUM('ADMIN','UMUM','DIREKSI','DIVISI','SUB_DIVISI','CABANG') NOT NULL,
+  divisi_id INT NULL,
+  status ENUM('AKTIF','NONAKTIF') DEFAULT 'AKTIF',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- ============================================================
+-- 2. TABEL DIVISI
+-- ============================================================
+CREATE TABLE divisi (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nama_divisi VARCHAR(150) NOT NULL,
+  tipe ENUM('DIREKSI','DIVISI','SUB_DIVISI','SATKER','CABANG','UMUM') NOT NULL,
+  parent_id INT NULL,
+  aktif ENUM('YA','TIDAK') DEFAULT 'YA',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (parent_id) REFERENCES divisi(id) ON DELETE SET NULL
+);
+
+-- ============================================================
+-- 3. TABEL SURAT
+-- ============================================================
+CREATE TABLE surat (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nomor_surat VARCHAR(100) NOT NULL,
+  tanggal_surat DATE NOT NULL,
+  perihal VARCHAR(255) NOT NULL,
+  isi_surat TEXT NOT NULL,
+  pengirim_id INT NOT NULL,
+  penerima_id INT NOT NULL, -- default: Divisi Umum
+  status ENUM('MENUNGGU_UMUM','DIKIRIM_KE_DIREKSI','PROSES','SELESAI','ARSIP') DEFAULT 'MENUNGGU_UMUM',
+  file_lampiran VARCHAR(255) NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (pengirim_id) REFERENCES user(id) ON DELETE CASCADE,
+  FOREIGN KEY (penerima_id) REFERENCES user(id) ON DELETE CASCADE
+);
+
+-- ============================================================
+-- 4. TABEL DISPOSISI
+-- ============================================================
+CREATE TABLE disposisi (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  surat_id INT NOT NULL,
+  dari_id INT NOT NULL,
+  ke_id INT NOT NULL,
+  catatan TEXT NULL,
+  tanggal_disposisi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (surat_id) REFERENCES surat(id) ON DELETE CASCADE,
+  FOREIGN KEY (dari_id) REFERENCES user(id) ON DELETE CASCADE,
+  FOREIGN KEY (ke_id) REFERENCES user(id) ON DELETE CASCADE
+);
+
+-- ============================================================
+-- 5. TABEL TEMPLATE_SURAT (optional, untuk header/footer PNG)
+-- ============================================================
+CREATE TABLE template_surat (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nama_template VARCHAR(100) NOT NULL,
+  header_path VARCHAR(255) NULL,
+  footer_path VARCHAR(255) NULL,
+  aktif ENUM('YA','TIDAK') DEFAULT 'YA',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
+-- 6. TABEL LOG_AKTIVITAS (opsional, pelacakan backend)
+-- ============================================================
+CREATE TABLE log_aktivitas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  aksi VARCHAR(255) NOT NULL,
+  keterangan TEXT NULL,
+  waktu TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+);
+
+-- ============================================================
+-- 7. DATA AWAL (MASTER)
+-- ============================================================
+
+-- Divisi Umum (wajib, karena alur surat ke sini dulu)
+INSERT INTO divisi (nama_divisi, tipe) VALUES
+('Divisi Umum', 'UMUM');
+
+-- Contoh direksi & divisi utama (bisa kamu ubah/tambah nanti)
+INSERT INTO divisi (nama_divisi, tipe) VALUES
+('Direksi', 'DIREKSI'),
+('Divisi IT', 'DIVISI'),
+('Divisi Bisnis', 'DIVISI'),
+('Divisi Kepatuhan', 'DIVISI'),
+('Divisi Renbang', 'DIVISI'),
+('Satker SKAI', 'SATKER'),
+('Satker Menrisk', 'SATKER');
+
+-- User admin umum
+INSERT INTO user (username, password, nama_lengkap, role, divisi_id)
+VALUES ('admin.umum', MD5('12345'), 'Admin Divisi Umum', 'UMUM', 1);
+
+-- ============================================================
+-- SELESAI
+-- ============================================================
