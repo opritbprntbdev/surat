@@ -120,5 +120,30 @@ class SuratFunctions
         $stmt->execute();
         return $stmt->insert_id;
     }
+
+    /**
+     * Disposisi ke user tertentu: set penerima_id dan ubah status.
+     * Mengembalikan true jika berhasil.
+     */
+    public function disposisiKeUser(int $suratId, int $userTargetId, ?string $note, int $byUserId): bool
+    {
+        // Pastikan surat ada dan masih di UMUM
+        $cek = Database::fetchOne("SELECT id, status FROM surat WHERE id=?", [$suratId]);
+        if (!$cek) { return false; }
+
+        // Update surat: set penerima ke user target dan status TERDISPOSISI
+        $sql = "UPDATE surat SET penerima_id = ?, status = 'TERDISPOSISI' WHERE id = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param('ii', $userTargetId, $suratId);
+        $stmt->execute();
+
+        // Optional: catat log sederhana ke file
+        try {
+            $line = date('c') . "\tsurat_id=$suratId\tto_user=$userTargetId\tby=$byUserId\tnote=" . str_replace(["\n", "\t"], ' ', (string)$note) . "\n";
+            @file_put_contents(__DIR__ . '/../logs/disposisi.log', $line, FILE_APPEND);
+        } catch (\Throwable $e) { /* ignore */ }
+
+        return true;
+    }
 }
 ?>

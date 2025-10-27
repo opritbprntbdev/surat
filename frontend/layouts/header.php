@@ -26,5 +26,5 @@ $initial_user = strtoupper(substr($nama_user, 0, 1));
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📧</text></svg>">
 </head>
 
-<body>
+<body data-role="<?php echo strtoupper($_SESSION['role'] ?? 'CABANG'); ?>">
     <div class="gmail-container">

@@ -93,7 +93,6 @@
                         <a href="<?php echo $base_url; ?>index.php" class="btn">Batal</a>
 
                     </div>
-                    <br>
                     <div id="compose-error" class="error-message" style="margin-top:8px; display:none;"></div>
                 </form>
             </div>

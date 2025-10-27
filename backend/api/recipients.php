@@ -41,9 +41,20 @@ try {
                 'subtitle' => $row['tipe']
             ];
         }
-        // Optionally search users (disabled for now to avoid confusion with divisi routing)
-        // $sqlUser = "SELECT id, nama_lengkap FROM user WHERE status='AKTIF' AND nama_lengkap LIKE ? LIMIT 10";
-        // ...
+        // Also search active users for direct disposisi to user
+        $sqlUser = "SELECT id, nama_lengkap FROM user WHERE status='AKTIF' AND nama_lengkap LIKE ? ORDER BY nama_lengkap LIMIT 20";
+        $stmtU = $db->prepare($sqlUser);
+        $stmtU->bind_param('s', $like);
+        $stmtU->execute();
+        $resU = $stmtU->get_result();
+        while ($u = $resU->fetch_assoc()) {
+            $data[] = [
+                'type' => 'USER',
+                'id' => (int)$u['id'],
+                'label' => $u['nama_lengkap'],
+                'subtitle' => 'USER'
+            ];
+        }
     }
     successResponse($data);
 } catch (Exception $e) {

@@ -36,6 +36,14 @@ const Components = {
   createSuratDetail(surat) {
     const div = document.createElement("div");
     div.className = "email-detail-content";
+    const role = (document.body && document.body.dataset && document.body.dataset.role)
+      ? document.body.dataset.role.toUpperCase()
+      : 'CABANG';
+    const actionsHTML = role === 'UMUM'
+      ? `<div class="email-detail-actions" style="margin-top:8px;">
+            <button class="btn btn-primary dispose-btn" data-surat-id="${surat.id}">Disposisi</button>
+         </div>`
+      : '';
     div.innerHTML = `
             <div class="email-detail-header">
                 <h2 class="email-detail-subject">${Utils.escapeHtml(
@@ -62,10 +70,32 @@ const Components = {
                       surat.penerima_nama
                     )}
                 </div>
+                ${actionsHTML}
             </div>
       <div class="email-detail-body">
-        <div class="letter-page">
-          <div class="letter-content">${surat.isi_surat || ''}</div>
+        <div class="preview-controls">
+            <button class="btn btn-secondary pdf-btn" data-surat-id="${surat.id}">PDF</button>
+            <div class="zoom-controls">
+                <label for="zoom-select">Zoom:</label>
+                <select id="zoom-select" class="form-select">
+                    <option value="fit">Fit</option>
+                    <option value="1.0" selected>100%</option>
+                    <option value="0.9">90%</option>
+                    <option value="0.8">80%</option>
+                    <option value="0.7">70%</option>
+                    <option value="0.6">60%</option>
+                    <option value="0.5">50%</option>
+                    <option value="0.4">40%</option>
+                    <option value="0.3">30%</option>
+                    <option value="0.2">20%</option>
+                    <option value="0.1">10%</option>
+                </select>
+            </div>
+        </div>
+        <div class="letter-page-wrapper">
+            <div class="letter-page">
+              <div class="letter-content">${surat.isi_surat || ''}</div>
+            </div>
         </div>
       </div>
         `;

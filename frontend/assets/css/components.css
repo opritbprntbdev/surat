@@ -171,6 +171,39 @@
     word-wrap: break-word;
 }
 
+.preview-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 24px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dadce0;
+}
+
+.zoom-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.zoom-controls label {
+    font-size: 14px;
+    color: #5f6368;
+}
+
+#zoom-select {
+    min-width: 80px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.zoom-controls .btn.active {
+    background-color: #e8f0fe;
+    color: #1967d2;
+    font-weight: 500;
+}
+
 .email-detail-meta {
     display: flex;
     align-items: center;
@@ -197,8 +230,15 @@
     font-weight: 500;
 }
 
+.letter-page-wrapper {
+    overflow: auto;
+    flex-grow: 1;
+    padding: 24px;
+    background-color: #f1f3f4;
+}
+
 .email-detail-from-info h4 {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 500;
     color: #202124;
     margin-bottom: 2px;
@@ -1361,12 +1401,6 @@
     color: #9e9e9e;
 }
 
-.empty-icon {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 16px;
-}
-
 /* Responsive */
 @media (max-width: 768px) {
     .content-header {
@@ -1508,7 +1542,7 @@
 body.modal-open {
     overflow: hidden;
 }
-.email-detail-body .letter-page {
+.email-detail_body .letter-page {
     /* Simulate an A4-ish readable column while staying responsive */
     width: 794px; /* ~A4 width at 96dpi */
     max-width: 100%;
@@ -1517,37 +1551,37 @@ body.modal-open {
 
 /* Mobile responsiveness for pasted Word content */
 @media (max-width: 768px) {
-    .email-detail-body .letter-page {
+    .email-detail_body .letter-page {
         width: 100% !important; /* Fill pane on phones */
         padding: 0 8px; /* small breathing room */
     }
-    .email-detail-body .letter-content {
+    .email-detail_body .letter-content {
         font-size: 11.5pt; /* slightly smaller text on small screens */
         line-height: 1.6;
     }
     /* Make images always scale down even if inline width/height exist */
-    .email-detail-body .letter-content img {
+    .email-detail_body .letter-content img {
         max-width: 100% !important;
         width: auto !important;  /* Do not upscale small images */
         height: auto !important;
     }
     /* Tables from Word often have fixed px widths; force them fluid */
-    .email-detail-body .letter-content table {
+    .email-detail_body .letter-content table {
         width: 100% !important;
         max-width: 100% !important;
         table-layout: fixed; /* enable wrapping */
         display: table; /* keep as table but allow width override */
     }
     /* Neutralize explicit width on Word-exported tables/cells */
-    .email-detail-body .letter-content table[style*="width"],
-    .email-detail-body .letter-content table[width],
-    .email-detail-body .letter-content td[width],
-    .email-detail-body .letter-content th[width] { width: auto !important; }
-    .email-detail-body .letter-content th,
-    .email-detail-body .letter-content td {
+    .email-detail_body .letter-content table[style*="width"],
+    .email-detail_body .letter-content table[width],
+    .email-detail_body .letter-content td[width],
+    .email-detail_body .letter-content th[width] { width: auto !important; }
+    .email-detail_body .letter-content th,
+    .email-detail_body .letter-content td {
         word-break: break-word;
         white-space: normal !important;
     }
     /* Prevent accidental horizontal scrolling from any leftover inline widths */
-    .email-detail-body { overflow-x: hidden; }
+    .email-detail_body { overflow-x: hidden; }
 }
