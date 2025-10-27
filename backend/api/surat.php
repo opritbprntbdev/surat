@@ -12,23 +12,25 @@ try {
 
     $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
     if ($method === 'POST') {
-        // Create minimal surat (Cabang → UMUM)
+        // Selalu baca input JSON untuk POST request
         $payload = json_decode(file_get_contents('php://input'), true);
+
+        // Validasi payload
         if (!is_array($payload)) {
-            $payload = $_POST; // support form-encoded fallback
+            errorResponse('Invalid JSON payload.', 400);
         }
 
-        $perihal = trim($payload['perihal'] ?? $payload['judul'] ?? '');
-        $isi = $payload['isi_surat'] ?? $payload['html_content'] ?? null;
+        $perihal = trim($payload['perihal'] ?? '');
+        $isi = $payload['isi_surat'] ?? null;
 
         if ($perihal === '') {
-            errorResponse('Perihal/Judul wajib diisi', 422);
+            errorResponse('Perihal wajib diisi', 422);
         }
 
         $userId = (int)($_SESSION['user_id']);
-        // divisi_id tidak diperlukan untuk insert berdasarkan skema baru
 
         $newId = $suratFunctions->createSurat($userId, $perihal, $isi);
+        // Menggunakan successResponse yang konsisten dengan frontend
         successResponse(['id' => $newId], 'Surat berhasil dibuat dan dikirim ke UMUM');
 
     } else if (isset($_GET['id'])) {

@@ -305,9 +305,9 @@
                 const result = await response.json();
 
                 if (result.success && result.data && result.data.id) {
-                    // Arahkan ke halaman detail surat dengan ID yang benar
+                    // Arahkan ke halaman utama (inbox/sent) setelah berhasil mengirim
                     alert(result.message || 'Surat berhasil dikirim!');
-                    window.location.href = `surat_detail.php?id=${result.data.id}`;
+                    window.location.href = 'index.php?box=sent';
                 } else {
                     errorEl.textContent = result.error || 'Gagal mengirim surat.';
                     errorEl.style.display = 'block';
