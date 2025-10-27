@@ -3,74 +3,76 @@
 
 <main class="main-content">
     <div class="page-content">
-    <div class="content-header">
-        <div class="header-left">
-            <button id="mobile-menu-btn" class="mobile-menu-btn" title="Menu">
-                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
-            <h1>Manajemen User</h1>
-            <p>Kelola pengguna sistem aplikasi surat</p>
+        <div class="content-header">
+            <div class="header-left">
+                <button id="mobile-menu-btn" class="mobile-menu-btn" title="Menu">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+                <h1>Manajemen User</h1>
+                <p>Kelola pengguna sistem aplikasi surat</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="openAddUserModal()">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Tambah User
+                </button>
+            </div>
         </div>
-        <div class="header-actions">
-            <button class="btn btn-primary" onclick="openAddUserModal()">
-                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                </svg>
-                Tambah User
-            </button>
-        </div>
-    </div>
 
-    <div class="card">
-        <div class="card-header">
-            <div class="filters">
-                <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="Cari nama atau username..." class="form-control">
+        <div class="card">
+            <div class="card-header">
+                <div class="filters">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Cari nama atau username..."
+                            class="form-control">
+                    </div>
+                    <div class="filter-group">
+                        <select id="roleFilter" class="form-control" onchange="filterUsers()">
+                            <option value="">Semua Role</option>
+                            <option value="ADMIN">Admin</option>
+                            <option value="UMUM">Umum</option>
+                            <option value="DIREKSI">Direksi</option>
+                            <option value="DIVISI">Divisi</option>
+                            <option value="SUB_DIVISI">Sub Divisi</option>
+                            <option value="CABANG">Cabang</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="filter-group">
-                    <select id="roleFilter" class="form-control" onchange="filterUsers()">
-                        <option value="">Semua Role</option>
-                        <option value="ADMIN">Admin</option>
-                        <option value="UMUM">Umum</option>
-                        <option value="DIREKSI">Direksi</option>
-                        <option value="DIVISI">Divisi</option>
-                        <option value="SUB_DIVISI">Sub Divisi</option>
-                        <option value="CABANG">Cabang</option>
-                    </select>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Username</th>
+                            <th>Nama Lengkap</th>
+                            <th>Role</th>
+                            <th>Dibuat</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- Data akan dimuat via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer">
+                <div class="pagination-info">
+                    <span id="paginationInfo">Menampilkan 0 dari 0 user</span>
+                </div>
+                <div class="pagination" id="pagination">
+                    <!-- Pagination akan dimuat via JavaScript -->
                 </div>
             </div>
         </div>
-
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Username</th>
-                        <th>Nama Lengkap</th>
-                        <th>Role</th>
-                        <th>Dibuat</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="usersTableBody">
-                    <!-- Data akan dimuat via JavaScript -->
-                </tbody>
-            </table>
-        </div>
-
-        <div class="card-footer">
-            <div class="pagination-info">
-                <span id="paginationInfo">Menampilkan 0 dari 0 user</span>
-            </div>
-            <div class="pagination" id="pagination">
-                <!-- Pagination akan dimuat via JavaScript -->
-            </div>
-        </div>
-    </div>
     </div>
 </main>
 
