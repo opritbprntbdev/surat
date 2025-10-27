@@ -3,10 +3,14 @@
 if (!isset($base_url)) {
     $base_url = '/surat/frontend/';
 }
+
+// Ambil path file PHP yang sedang aktif
+$current_page = basename($_SERVER['PHP_SELF']);
+$current_path = $_SERVER['REQUEST_URI'];
 ?>
 <aside id="sidebar" class="sidebar">
     <div class="sidebar-header">
-        <a href="compose.php" id="compose-btn" class="compose-btn">
+        <a href="<?php echo $base_url; ?>compose.php" id="compose-btn" class="compose-btn">
             <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
@@ -16,7 +20,9 @@ if (!isset($base_url)) {
 
     <nav class="sidebar-nav">
         <div class="nav-section">
-            <a href="index.php" class="nav-item active">
+            <!-- Kotak Masuk -->
+            <a href="<?php echo $base_url; ?>index.php"
+                class="nav-item <?php echo ($current_page == 'index.php' && !strpos($current_path, '/pages/')) ? 'active' : ''; ?>">
                 <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
@@ -24,13 +30,18 @@ if (!isset($base_url)) {
                 </svg>
                 <span>Kotak Masuk</span>
             </a>
-            <a href="surat-keluar.php" class="nav-item">
+
+            <!-- Surat Terkirim -->
+            <a href="<?php echo $base_url; ?>surat-keluar.php"
+                class="nav-item <?php echo ($current_page == 'surat-keluar.php') ? 'active' : ''; ?>">
                 <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
                 </svg>
                 <span>Surat Terkirim</span>
             </a>
+
+            <!-- Arsip -->
             <a href="#" class="nav-item">
                 <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -39,9 +50,10 @@ if (!isset($base_url)) {
                 </svg>
                 <span>Arsip</span>
             </a>
-            <!-- MENU USER YANG SUDAH DIARAHKAN KE pages/users/index.php -->
-            <a href="pages/users/index.php"
-                class="nav-item <?php echo strpos($_SERVER['PHP_SELF'], 'pages/users') !== false ? 'active' : ''; ?>">
+
+            <!-- User Management - PERBAIKAN DI SINI -->
+            <a href="<?php echo $base_url; ?>pages/users/index.php"
+                class="nav-item <?php echo (strpos($current_path, '/pages/users/') !== false) ? 'active' : ''; ?>">
                 <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z">
@@ -49,7 +61,6 @@ if (!isset($base_url)) {
                 </svg>
                 <span>User Management</span>
             </a>
-            <!-- Tombol Logout dihapus dari sini -->
         </div>
     </nav>
 </aside>

@@ -5,6 +5,11 @@
 <main class="main-content">
     <header class="header">
         <div class="header-left">
+            <button id="mobile-menu-btn" class="mobile-menu-btn" title="Menu">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
             <button id="refresh-btn" class="refresh-btn" title="Refresh">
                 <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

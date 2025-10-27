@@ -685,3 +685,13 @@ body {
 .dropdown-item .icon {
     color: #5f6368;
 }
+
+/* Di bagian Reset and Base Styles, tambahkan: */
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+a:hover {
+    text-decoration: none;
+}
