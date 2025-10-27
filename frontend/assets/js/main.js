@@ -82,20 +82,7 @@ const App = {
       const response = await API.getSuratDetail(suratId);
       const suratData = response.data;
       detailPane.innerHTML = "";
-  const content = Components.createSuratDetail(suratData);
-      // Tambahkan link PDF preview di header actions (opsional)
-      const pdfLink = document.createElement('a');
-      pdfLink.href = '../backend/api/pdf.php?id=' + encodeURIComponent(suratId);
-      pdfLink.className = 'btn btn-outline';
-      pdfLink.target = '_blank';
-      pdfLink.textContent = 'PDF';
-      const hdr = content.querySelector('.email-detail-header');
-      if (hdr) {
-        const act = document.createElement('div');
-        act.style.marginTop = '8px';
-        act.appendChild(pdfLink);
-        hdr.appendChild(act);
-      }
+      const content = Components.createSuratDetail(suratData);
       // Tambah tombol back untuk mobile
       if (window.innerWidth <= 767) {
         const header = content.querySelector(".email-detail-header");
