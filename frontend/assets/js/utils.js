@@ -401,6 +401,147 @@ const Utils = {
     }
 };
 
+// Notification System
+function showNotification(message, type = 'info', duration = 3000) {
+    // Remove existing notifications
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(notification => notification.remove());
+    
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span class="notification-message">${message}</span>
+            <button class="notification-close" onclick="this.parentElement.parentElement.remove()">×</button>
+        </div>
+    `;
+    
+    // Add to DOM
+    document.body.appendChild(notification);
+    
+    // Trigger animation
+    setTimeout(() => notification.classList.add('show'), 10);
+    
+    // Auto remove
+    if (duration > 0) {
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, duration);
+    }
+}
+
+// Loading Overlay Functions
+function showLoadingOverlay() {
+    let overlay = document.getElementById('loadingOverlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'loadingOverlay';
+        overlay.className = 'loading-overlay';
+        overlay.innerHTML = '<div class="loading-spinner"></div>';
+        document.body.appendChild(overlay);
+    }
+    overlay.style.display = 'flex';
+}
+
+function hideLoadingOverlay() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.style.display = 'none';
+    }
+}
+
+// Add notification styles to head if not exists
+if (!document.querySelector('#notification-styles')) {
+    const notificationStyles = document.createElement('style');
+    notificationStyles.id = 'notification-styles';
+    notificationStyles.textContent = `
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            max-width: 400px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(60, 64, 67, 0.3);
+            transform: translateX(400px);
+            transition: transform 0.3s ease-out;
+            opacity: 0;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .notification-content {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        
+        .notification-message {
+            flex: 1;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #5f6368;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+        
+        .notification-close:hover {
+            background-color: #f1f3f4;
+        }
+        
+        .notification-success {
+            border-left: 4px solid #34a853;
+        }
+        
+        .notification-error {
+            border-left: 4px solid #ea4335;
+        }
+        
+        .notification-warning {
+            border-left: 4px solid #fbbc04;
+        }
+        
+        .notification-info {
+            border-left: 4px solid #1a73e8;
+        }
+        
+        @media (max-width: 768px) {
+            .notification {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+                transform: translateY(-100px);
+            }
+            
+            .notification.show {
+                transform: translateY(0);
+            }
+        }
+    `;
+    document.head.appendChild(notificationStyles);
+}
+
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = Utils;
