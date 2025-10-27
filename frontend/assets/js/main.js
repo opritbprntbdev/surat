@@ -101,53 +101,55 @@ const App = {
       detailPane.appendChild(content);
 
       // Jika role UMUM, wire tombol Disposisi
-      const role = (document.body && document.body.dataset && document.body.dataset.role)
-        ? document.body.dataset.role.toUpperCase()
-        : 'CABANG';
-      if (role === 'UMUM') {
-        const btn = content.querySelector('.dispose-btn');
+      const role =
+        document.body && document.body.dataset && document.body.dataset.role
+          ? document.body.dataset.role.toUpperCase()
+          : "CABANG";
+      if (role === "UMUM") {
+        const btn = content.querySelector(".dispose-btn");
         if (btn) {
-          btn.addEventListener('click', () => App.openDisposisiModal(suratData));
+          btn.addEventListener("click", () =>
+            App.openDisposisiModal(suratData)
+          );
         }
       }
 
       // Wire up PDF and Zoom buttons
-      const pdfBtn = content.querySelector('.pdf-btn');
+      const pdfBtn = content.querySelector(".pdf-btn");
       if (pdfBtn) {
-          pdfBtn.addEventListener('click', (e) => {
-              const id = e.currentTarget.dataset.suratId;
-              window.open(`../backend/api/pdf.php?id=${id}`, '_blank');
-          });
+        pdfBtn.addEventListener("click", (e) => {
+          const id = e.currentTarget.dataset.suratId;
+          window.open(`../backend/api/pdf.php?id=${id}`, "_blank");
+        });
       }
 
-      const zoomSelect = content.querySelector('#zoom-select');
-      const letterPage = content.querySelector('.letter-page');
-      const wrapper = content.querySelector('.letter-page-wrapper');
+      const zoomSelect = content.querySelector("#zoom-select");
+      const letterPage = content.querySelector(".letter-page");
+      const wrapper = content.querySelector(".letter-page-wrapper");
 
       const applyZoom = () => {
-          if (!letterPage || !wrapper) return;
-          const zoomLevel = zoomSelect.value;
+        if (!letterPage || !wrapper) return;
+        const zoomLevel = zoomSelect.value;
 
-          if (zoomLevel === 'fit') {
-              letterPage.style.transform = `scale(1)`;
-              const scale = wrapper.offsetWidth / letterPage.offsetWidth;
-              letterPage.style.transform = `scale(${scale})`;
-              letterPage.style.transformOrigin = 'top left';
-          } else {
-              letterPage.style.transform = `scale(${zoomLevel})`;
-              letterPage.style.transformOrigin = 'top center';
-          }
+        if (zoomLevel === "fit") {
+          letterPage.style.transform = `scale(1)`;
+          const scale = wrapper.offsetWidth / letterPage.offsetWidth;
+          letterPage.style.transform = `scale(${scale})`;
+          letterPage.style.transformOrigin = "top left";
+        } else {
+          letterPage.style.transform = `scale(${zoomLevel})`;
+          letterPage.style.transformOrigin = "top center";
+        }
       };
 
       if (zoomSelect) {
-          zoomSelect.addEventListener('change', applyZoom);
-          // Use a small timeout to allow the DOM to render before calculating width
-          setTimeout(() => {
-              zoomSelect.value = 'fit';
-              applyZoom();
-          }, 50);
+        zoomSelect.addEventListener("change", applyZoom);
+        // Use a small timeout to allow the DOM to render before calculating width
+        setTimeout(() => {
+          zoomSelect.value = "fit";
+          applyZoom();
+        }, 50);
       }
-
     } catch (error) {
       detailPane.innerHTML = Components.createErrorState(
         "Gagal Memuat Detail",
@@ -159,8 +161,8 @@ const App = {
 
   openDisposisiModal(surat) {
     // Simple modal
-    const modal = document.createElement('div');
-    modal.className = 'modal';
+    const modal = document.createElement("div");
+    modal.className = "modal";
     modal.innerHTML = `
       <div class="modal-content">
         <div class="modal-header">
@@ -184,63 +186,87 @@ const App = {
         </div>
       </div>`;
 
-  document.body.appendChild(modal);
-  modal.style.display = 'block';
+    document.body.appendChild(modal);
+    modal.style.display = "block";
 
-    const close = () => { if (modal && modal.parentNode) modal.parentNode.removeChild(modal); };
-    modal.querySelector('.close-btn').addEventListener('click', close);
-    modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
-    modal.querySelector('#disp-cancel').addEventListener('click', close);
+    const close = () => {
+      if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
+    };
+    modal.querySelector(".close-btn").addEventListener("click", close);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) close();
+    });
+    modal.querySelector("#disp-cancel").addEventListener("click", close);
 
     // Typeahead users
-    const input = modal.querySelector('#disp-to');
-    const list = modal.querySelector('#disp-list');
-    let lastQ = ''; let t = null;
-    input.addEventListener('input', () => {
+    const input = modal.querySelector("#disp-to");
+    const list = modal.querySelector("#disp-list");
+    let lastQ = "";
+    let t = null;
+    input.addEventListener("input", () => {
       const q = input.value.trim();
-      if (q === lastQ) return; lastQ = q;
+      if (q === lastQ) return;
+      lastQ = q;
       if (t) clearTimeout(t);
       t = setTimeout(async () => {
-        if (q.length < 2) { list.innerHTML = ''; return; }
+        if (q.length < 2) {
+          list.innerHTML = "";
+          return;
+        }
         try {
-          const res = await fetch('../backend/api/recipients.php?q=' + encodeURIComponent(q), { credentials: 'same-origin' });
+          const res = await fetch(
+            "../backend/api/recipients.php?q=" + encodeURIComponent(q),
+            { credentials: "same-origin" }
+          );
           const json = await res.json();
-          list.innerHTML = '';
-          (json.data || []).filter(x => x.type === 'USER').forEach(x => {
-            const opt = document.createElement('option');
-            opt.value = x.label;
-            opt.dataset.id = x.id;
-            list.appendChild(opt);
-          });
+          list.innerHTML = "";
+          (json.data || [])
+            .filter((x) => x.type === "USER")
+            .forEach((x) => {
+              const opt = document.createElement("option");
+              opt.value = x.label;
+              opt.dataset.id = x.id;
+              list.appendChild(opt);
+            });
         } catch {}
       }, 250);
     });
 
     const resolveUserId = () => {
       const val = input.value.trim();
-      const opt = Array.from(list.options).find(o => o.value === val);
+      const opt = Array.from(list.options).find((o) => o.value === val);
       return opt ? parseInt(opt.dataset.id, 10) : NaN;
     };
 
-    modal.querySelector('#disp-send').addEventListener('click', async () => {
+    modal.querySelector("#disp-send").addEventListener("click", async () => {
       const userId = resolveUserId();
-      if (!userId || Number.isNaN(userId)) { alert('Pilih penerima dari daftar.'); return; }
-      const note = modal.querySelector('#disp-note').value.trim();
+      if (!userId || Number.isNaN(userId)) {
+        alert("Pilih penerima dari daftar.");
+        return;
+      }
+      const note = modal.querySelector("#disp-note").value.trim();
       try {
-        const resp = await fetch('../backend/api/disposisi.php', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin',
-          body: JSON.stringify({ surat_id: surat.id, user_id: userId, note })
+        const resp = await fetch("../backend/api/disposisi.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({ surat_id: surat.id, user_id: userId, note }),
         });
         const json = await resp.json();
-        if (!resp.ok || json.success === false) throw new Error(json.message || 'Gagal');
+        if (!resp.ok || json.success === false)
+          throw new Error(json.message || "Gagal");
         close();
         // Refresh list and detail
         App.loadSurat();
         // Force clear detail
-        const detailPane = Utils.$('#email-detail');
-        if (detailPane) detailPane.innerHTML = Components.createEmptyState('Berhasil', 'Surat telah didisposisi.');
+        const detailPane = Utils.$("#email-detail");
+        if (detailPane)
+          detailPane.innerHTML = Components.createEmptyState(
+            "Berhasil",
+            "Surat telah didisposisi."
+          );
       } catch (err) {
-        alert(err.message || 'Gagal mengirim disposisi');
+        alert(err.message || "Gagal mengirim disposisi");
       }
     });
   },
