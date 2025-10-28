@@ -119,7 +119,8 @@ const App = {
       if (pdfBtn) {
         pdfBtn.addEventListener("click", (e) => {
           const id = e.currentTarget.dataset.suratId;
-          window.open(`../backend/api/pdf.php?id=${id}`, "_blank");
+          const base = (window.API_BASE || '/surat/backend/api').replace(/\/$/, '');
+          window.open(`${base}/pdf.php?id=${id}`, "_blank");
         });
       }
 
@@ -203,21 +204,22 @@ const App = {
     const list = modal.querySelector("#disp-list");
     let lastQ = "";
     let t = null;
+    // Load default suggestions on focus (empty query)
+    input.addEventListener("focus", () => {
+      triggerFetch("");
+    });
     input.addEventListener("input", () => {
       const q = input.value.trim();
+      triggerFetch(q);
+    });
+    function triggerFetch(q){
       if (q === lastQ) return;
       lastQ = q;
       if (t) clearTimeout(t);
       t = setTimeout(async () => {
-        if (q.length < 2) {
-          list.innerHTML = "";
-          return;
-        }
         try {
-          const res = await fetch(
-            "../backend/api/recipients.php?q=" + encodeURIComponent(q),
-            { credentials: "same-origin" }
-          );
+          const base = (window.API_BASE || '/surat/backend/api').replace(/\/$/, '');
+          const res = await fetch(`${base}/recipients.php?q=` + encodeURIComponent(q), { credentials: "same-origin" });
           const json = await res.json();
           list.innerHTML = "";
           (json.data || [])
@@ -229,8 +231,8 @@ const App = {
               list.appendChild(opt);
             });
         } catch {}
-      }, 250);
-    });
+      }, 200);
+    }
 
     const resolveUserId = () => {
       const val = input.value.trim();
@@ -246,11 +248,12 @@ const App = {
       }
       const note = modal.querySelector("#disp-note").value.trim();
       try {
-        const resp = await fetch("../backend/api/disposisi.php", {
+        const base = (window.API_BASE || '/surat/backend/api').replace(/\/$/, '');
+        const resp = await fetch(`${base}/disposisi.php?action=request`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "same-origin",
-          body: JSON.stringify({ surat_id: surat.id, user_id: userId, note }),
+          body: JSON.stringify({ surat_id: surat.id, target_user_id: userId, note }),
         });
         const json = await resp.json();
         if (!resp.ok || json.success === false)

@@ -10,7 +10,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
             </button>
-            <a href="<?php echo $base_url; ?>compose.php" id="compose-top-btn" class="refresh-btn" title="Tulis Surat" style="margin-left:8px;">
+            <a href="<?php echo $base_url; ?>pages/surat/compose.php" id="compose-top-btn" class="refresh-btn" title="Tulis Surat" style="margin-left:8px;">
                 <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>

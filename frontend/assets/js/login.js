@@ -17,7 +17,7 @@ document.getElementById('login-btn').onclick = async function() {
         });
         const data = await res.json();
         if (data.success) {
-            window.location.href = "index.html";
+            window.location.href = "index.php";
         } else {
             errorDiv.textContent = data.error || "Login gagal!";
             errorDiv.style.display = "block";

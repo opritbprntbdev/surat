@@ -35,7 +35,8 @@ try {
 
     } else if (isset($_GET['id'])) {
         $id = (int) $_GET['id'];
-        $surat = $suratFunctions->getSuratById($id);
+        $currentUserId = (int)($_SESSION['user_id']);
+        $surat = $suratFunctions->getSuratById($id, $currentUserId);
         if ($surat) {
             successResponse($surat);
         } else {

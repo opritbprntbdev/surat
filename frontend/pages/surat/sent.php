@@ -1,5 +1,5 @@
-<?php require_once 'layouts/header.php'; ?>
-<?php require_once 'layouts/sidebar.php'; ?>
+<?php require_once __DIR__ . '/../../layouts/header.php'; ?>
+<?php require_once __DIR__ . '/../../layouts/sidebar.php'; ?>
 
 <main class="main-content">
     <header class="header">
@@ -16,17 +16,17 @@
         <div class="header-right"></div>
     </header>
 
-        <div class="email-content">
-                <div class="email-list" id="email-list"></div>
-                <div class="email-detail" id="email-detail">
-                        <div class="email-detail-placeholder">
-                                <p>Pilih surat untuk melihat detail</p>
-                        </div>
-                </div>
+    <div class="email-content">
+        <div class="email-list" id="email-list"></div>
+        <div class="email-detail" id="email-detail">
+            <div class="email-detail-placeholder">
+                <p>Pilih surat untuk melihat detail</p>
+            </div>
         </div>
+    </div>
 </main>
 
-<?php require_once 'layouts/footer.php'; ?>
+<?php require_once __DIR__ . '/../../layouts/footer.php'; ?>
 
 <script>
 // Minimal loader for Sent box (Cabang)

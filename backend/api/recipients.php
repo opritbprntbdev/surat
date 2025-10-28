@@ -36,7 +36,7 @@ try {
         while ($row = $res->fetch_assoc()) {
             $data[] = [
                 'type' => $row['tipe'],
-                'id' => (int)$row['id'],
+                'id' => (int) $row['id'],
                 'label' => $row['nama_divisi'],
                 'subtitle' => $row['tipe']
             ];
@@ -50,9 +50,22 @@ try {
         while ($u = $resU->fetch_assoc()) {
             $data[] = [
                 'type' => 'USER',
-                'id' => (int)$u['id'],
+                'id' => (int) $u['id'],
                 'label' => $u['nama_lengkap'],
                 'subtitle' => 'USER'
+            ];
+        }
+    } else {
+        // Default suggestions when no query is provided (for quick pick)
+        // Prioritize DIREKSI, then UMUM, then CABANG by role
+        $sqlSug = "SELECT id, nama_lengkap, UPPER(COALESCE(role,'')) AS role_u FROM user WHERE status='AKTIF' ORDER BY FIELD(UPPER(role),'DIREKSI','UMUM','CABANG'), nama_lengkap LIMIT 20";
+        $resS = $db->query($sqlSug);
+        while ($s = $resS->fetch_assoc()) {
+            $data[] = [
+                'type' => 'USER',
+                'id' => (int) $s['id'],
+                'label' => $s['nama_lengkap'],
+                'subtitle' => $s['role_u'] ?: 'USER'
             ];
         }
     }

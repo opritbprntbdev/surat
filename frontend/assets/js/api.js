@@ -1,7 +1,8 @@
 // API Utilities
 const API = {
     // Base configuration
-    baseURL: '../backend/api',
+    // Gunakan base absolut agar tetap benar dari halaman manapun
+    baseURL: (window.API_BASE && typeof window.API_BASE === 'string') ? window.API_BASE : '/surat/backend/api',
     defaultHeaders: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'

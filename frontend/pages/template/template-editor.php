@@ -1,8 +1,8 @@
 <?php
 $page_title = "Editor Template";
-require_once __DIR__ . '/../backend/config/config.php';
-include 'layouts/header.php';
-include 'layouts/sidebar.php';
+require_once __DIR__ . '/../../../backend/config/config.php';
+require_once __DIR__ . '/../../layouts/header.php';
+require_once __DIR__ . '/../../layouts/sidebar.php';
 ?>
 
 <main class="main-content">
@@ -66,7 +66,7 @@ include 'layouts/sidebar.php';
             toolbar_sticky: true,
             quickbars_selection_toolbar: 'bold italic underline | forecolor backcolor | link',
             quickbars_insert_toolbar: 'table charmap',
-            paste_as_text: true, // Changed to true for better cross-browser paste consistency
+            paste_as_text: true,
             paste_data_images: true,
             branding: false,
             statusbar: false,
@@ -77,7 +77,7 @@ include 'layouts/sidebar.php';
 
         if (isEditMode) {
             pageTitle.textContent = 'Edit Template';
-            fetch(`../backend/api/templates.php?id=${templateId}`)
+            fetch(`../../../backend/api/templates.php?id=${templateId}`)
                 .then(response => response.json())
                 .then(result => {
                     if (result.data) {
@@ -108,8 +108,8 @@ include 'layouts/sidebar.php';
             }
 
             const apiUrl = isEditMode
-                ? `../backend/api/templates.php?id=${templateId}`
-                : '../backend/api/templates.php';
+                ? `../../../backend/api/templates.php?id=${templateId}`
+                : '../../../backend/api/templates.php';
 
             const apiMethod = isEditMode ? 'PUT' : 'POST';
 
@@ -135,4 +135,4 @@ include 'layouts/sidebar.php';
     });
 </script>
 
-<?php include 'layouts/footer.php'; ?>
+<?php include '../../layouts/footer.php'; ?>
