@@ -50,7 +50,7 @@ class SuratFunctions
             SELECT s.id,
                    CASE 
                      WHEN COALESCE(s.penerima_id, 0) <> 0 THEN s.penerima_id
-                     WHEN s.status = 'MENUNGGU_UMUM' THEN %d
+                     WHEN s.status = 'MENUNGGU_TINDAKAN_UMUM' THEN %d
                      ELSE %d
                    END AS user_id,
                    'AKTIF' AS tipe_penerima,
@@ -64,10 +64,11 @@ class SuratFunctions
         $this->db->query(sprintf($sql, $umumId, $umumId));
     }
 
-    public function getSuratList(?string $box = null, ?string $role = null, ?int $userId = null): array
+    public function getSuratList(?string $box = null, ?string $role = null, ?int $userId = null, array $opts = []): array
     {
         $role = $role ? strtoupper($role) : null;
         $box = $box ? strtolower($box) : null;
+        $myUnanswered = !empty($opts['my_unanswered']);
 
         // Pastikan data lama telah memiliki routing dasar di surat_penerima
         $this->backfillSuratPenerima();
@@ -78,13 +79,18 @@ class SuratFunctions
                 // Surat terkirim oleh user ini
                 $sql = "
                     SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
-                           pengirim.nama_lengkap as pengirim_nama
+                           pengirim.nama_lengkap as pengirim_nama,
+                           (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id) AS dispo_count,
+                           (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id AND d.user_id = ?) AS my_dispo_count,
+                           (SELECT d.disposition_text FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_text,
+                           (SELECT d.created_at FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_created_at,
+                           (SELECT u.role FROM dispositions d JOIN user u ON u.id=d.user_id WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_user_role
                     FROM surat s
                     JOIN user pengirim ON s.pengirim_id = pengirim.id
                     WHERE s.pengirim_id = ?
                     ORDER BY s.tanggal_surat DESC
                     LIMIT 50";
-                $suratList = Database::fetchAll($sql, [$userId]);
+                $suratList = Database::fetchAll($sql, [$userId, $userId]);
                 $total = Database::fetchValue("SELECT COUNT(*) FROM surat WHERE pengirim_id = ?", [$userId]) ?? 0;
                 return ['data' => $suratList, 'total' => $total];
             }
@@ -93,29 +99,82 @@ class SuratFunctions
                 // Arsip untuk user ini (bukan aktif)
                 $sql = "
                     SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
-                           pengirim.nama_lengkap as pengirim_nama
+                           pengirim.nama_lengkap as pengirim_nama,
+                           (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id) AS dispo_count,
+                           (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id AND d.user_id = ?) AS my_dispo_count,
+                           (SELECT d.disposition_text FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_text,
+                           (SELECT d.created_at FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_created_at,
+                           (SELECT u.role FROM dispositions d JOIN user u ON u.id=d.user_id WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_user_role
                     FROM surat_penerima sp
                     JOIN surat s ON s.id = sp.surat_id
                     JOIN user pengirim ON s.pengirim_id = pengirim.id
                     WHERE sp.user_id = ? AND sp.tipe_penerima <> 'AKTIF'
                     ORDER BY sp.diterima_at DESC
                     LIMIT 50";
-                $suratList = Database::fetchAll($sql, [$userId]);
+                $suratList = Database::fetchAll($sql, [$userId, $userId]);
                 $total = Database::fetchValue("SELECT COUNT(*) FROM surat_penerima WHERE user_id=? AND tipe_penerima<>'AKTIF'", [$userId]) ?? 0;
                 return ['data' => $suratList, 'total' => $total];
             }
 
+            if ($box === 'my_disposisi' || $box === 'my_dispo' || $box === 'my') {
+                // Daftar semua jawaban disposisi milik user ini
+                $sql = "
+                    SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
+                           pengirim.nama_lengkap as pengirim_nama,
+                           d.disposition_text AS last_dispo_text,
+                           d.created_at AS last_dispo_created_at,
+                           (SELECT COUNT(*) FROM dispositions d2 WHERE d2.surat_id = s.id) AS dispo_count,
+                           (SELECT COUNT(*) FROM dispositions d3 WHERE d3.surat_id = s.id AND d3.user_id = ?) AS my_dispo_count,
+                           (SELECT u.role FROM dispositions dd JOIN user u ON u.id=dd.user_id WHERE dd.surat_id = s.id ORDER BY dd.created_at DESC LIMIT 1) AS last_dispo_user_role
+                    FROM dispositions d
+                    JOIN surat s ON s.id = d.surat_id
+                    JOIN user pengirim ON s.pengirim_id = pengirim.id
+                    WHERE d.user_id = ?
+                    ORDER BY d.created_at DESC
+                    LIMIT 50";
+                $suratList = Database::fetchAll($sql, [$userId, $userId]);
+                $total = Database::fetchValue("SELECT COUNT(*) FROM dispositions WHERE user_id=?", [$userId]) ?? 0;
+                return ['data' => $suratList, 'total' => $total];
+            }
+
             // Default: inbox aktif untuk user ini
-            $sql = "
+            // Jika filter 'belum dijawab' diaktifkan, gunakan NOT EXISTS untuk menyaring
+            if ($myUnanswered) {
+                $sql = "
                 SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
-                       pengirim.nama_lengkap as pengirim_nama
+                       pengirim.nama_lengkap as pengirim_nama,
+                       (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id) AS dispo_count,
+                       (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id AND d.user_id = ?) AS my_dispo_count,
+                       (SELECT d.disposition_text FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_text,
+                       (SELECT d.created_at FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_created_at,
+                       (SELECT u.role FROM dispositions d JOIN user u ON u.id=d.user_id WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_user_role
+                FROM surat_penerima sp
+                JOIN surat s ON s.id = sp.surat_id
+                JOIN user pengirim ON s.pengirim_id = pengirim.id
+                WHERE sp.user_id = ? AND sp.tipe_penerima = 'AKTIF'
+                  AND NOT EXISTS (
+                    SELECT 1 FROM dispositions d2 WHERE d2.surat_id = s.id AND d2.user_id = ?
+                  )
+                ORDER BY sp.diterima_at DESC
+                LIMIT 50";
+                $suratList = Database::fetchAll($sql, [$userId, $userId, $userId]);
+            } else {
+                $sql = "
+                SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
+                       pengirim.nama_lengkap as pengirim_nama,
+                       (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id) AS dispo_count,
+                       (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id AND d.user_id = ?) AS my_dispo_count,
+                       (SELECT d.disposition_text FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_text,
+                       (SELECT d.created_at FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_created_at,
+                       (SELECT u.role FROM dispositions d JOIN user u ON u.id=d.user_id WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_user_role
                 FROM surat_penerima sp
                 JOIN surat s ON s.id = sp.surat_id
                 JOIN user pengirim ON s.pengirim_id = pengirim.id
                 WHERE sp.user_id = ? AND sp.tipe_penerima = 'AKTIF'
                 ORDER BY sp.diterima_at DESC
                 LIMIT 50";
-            $suratList = Database::fetchAll($sql, [$userId]);
+                $suratList = Database::fetchAll($sql, [$userId, $userId]);
+            }
             $total = Database::fetchValue("SELECT COUNT(*) FROM surat_penerima WHERE user_id=? AND tipe_penerima='AKTIF'", [$userId]) ?? 0;
             return ['data' => $suratList, 'total' => $total];
         }
@@ -185,6 +244,49 @@ class SuratFunctions
         $surat['dispositions'] = $dispos;
         $surat['routing'] = $route;
         $surat['active_for_user'] = $activeForUser;
+
+        // Hitung progres terakhir (berdasarkan batch request terbaru jika ada)
+        try {
+            $latest = Database::fetchOne(
+                "SELECT request_batch FROM surat_penerima WHERE surat_id=? AND request_batch IS NOT NULL ORDER BY diterima_at DESC LIMIT 1",
+                [$id]
+            );
+            if ($latest && !empty($latest['request_batch'])) {
+                $batch = $latest['request_batch'];
+                $targets = Database::fetchAll(
+                    "SELECT sp.user_id, u.nama_lengkap AS user_nama, sp.tipe_penerima, sp.diterima_at, sp.ditindak_at
+                     FROM surat_penerima sp JOIN user u ON u.id=sp.user_id
+                     WHERE sp.surat_id=? AND sp.request_batch=?
+                     ORDER BY sp.diterima_at ASC",
+                    [$id, $batch]
+                );
+                $total = count($targets);
+                $done = 0;
+                $detail = [];
+                foreach ($targets as $t) {
+                    $isDone = ($t['tipe_penerima'] !== 'AKTIF');
+                    if ($isDone) {
+                        $done++;
+                    }
+                    $detail[] = [
+                        'user_id' => (int) $t['user_id'],
+                        'user_nama' => $t['user_nama'],
+                        'status' => $isDone ? 'SELESAI' : 'MENUNGGU',
+                        'diterima_at' => $t['diterima_at'],
+                        'ditindak_at' => $t['ditindak_at']
+                    ];
+                }
+                $surat['progress'] = [
+                    'batch' => $batch,
+                    'total' => $total,
+                    'done' => $done,
+                    'remaining' => max(0, $total - $done),
+                    'targets' => $detail
+                ];
+            }
+        } catch (\Throwable $e) {
+            // Abaikan jika kolom belum ada
+        }
         return $surat;
     }
 
@@ -209,7 +311,7 @@ class SuratFunctions
         $nomorSurat = 'DRAFT-' . date('YmdHis') . '-' . $pengirimId;
 
         $sql = "INSERT INTO surat (jenis_surat, nomor_surat, nomor_urut, tanggal_surat, perihal, isi_surat, template_id, pengirim_id, penerima_id, status, file_lampiran)
-                VALUES ('KELUAR', ?, 0, CURDATE(), ?, ?, NULL, ?, 0, 'MENUNGGU_UMUM', NULL)";
+                VALUES ('KELUAR', ?, 0, CURDATE(), ?, ?, NULL, ?, 0, 'MENUNGGU_TINDAKAN_UMUM', NULL)";
         $stmt = $this->db->prepare($sql);
         $stmt->bind_param('sssi', $nomorSurat, $perihal, $isiSurat, $pengirimId);
         $stmt->execute();
@@ -245,9 +347,47 @@ class SuratFunctions
      */
     private function addActiveForUser(int $suratId, int $userId): void
     {
+        // Hindari duplikasi penerima AKTIF untuk surat yang sama
+        $chk = $this->db->prepare("SELECT id FROM surat_penerima WHERE surat_id=? AND user_id=? AND tipe_penerima='AKTIF' LIMIT 1");
+        $chk->bind_param('ii', $suratId, $userId);
+        $chk->execute();
+        $exists = $chk->get_result()->fetch_assoc();
+        if ($exists) {
+            return;
+        }
+
         $ins = $this->db->prepare("INSERT INTO surat_penerima (surat_id, user_id, tipe_penerima, diterima_at) VALUES (?, ?, 'AKTIF', NOW())");
         $ins->bind_param('ii', $suratId, $userId);
         $ins->execute();
+    }
+
+    /**
+     * Helper: tambah penerima aktif baru dengan batch (untuk tracking progres request paralel)
+     */
+    private function addActiveForUserWithBatch(int $suratId, int $userId, ?string $batch): void
+    {
+        // Hindari duplikasi penerima AKTIF untuk surat yang sama
+        $chk = $this->db->prepare("SELECT id FROM surat_penerima WHERE surat_id=? AND user_id=? AND tipe_penerima='AKTIF' LIMIT 1");
+        $chk->bind_param('ii', $suratId, $userId);
+        $chk->execute();
+        $exists = $chk->get_result()->fetch_assoc();
+        if ($exists) {
+            return;
+        }
+
+        if ($batch) {
+            // Jika kolom request_batch tersedia, set nilainya; fallback ke insert biasa jika kolom belum ada
+            try {
+                $ins = $this->db->prepare("INSERT INTO surat_penerima (surat_id, user_id, tipe_penerima, diterima_at, request_batch) VALUES (?, ?, 'AKTIF', NOW(), ?)");
+                $ins->bind_param('iis', $suratId, $userId, $batch);
+                $ins->execute();
+                return;
+            } catch (\Throwable $e) {
+                // Kolom mungkin belum dimigrasi; lanjutkan tanpa batch
+            }
+        }
+
+        $this->addActiveForUser($suratId, $userId);
     }
 
     /**
@@ -258,10 +398,23 @@ class SuratFunctions
         // Arsipkan tugas aktif milik pengaju
         $this->closeActiveForUser($suratId, $byUserId);
         // Tambah tugas aktif untuk target
-        $this->addActiveForUser($suratId, $targetUserId);
+        $batch = substr(bin2hex(random_bytes(8)), 0, 16);
+        $this->addActiveForUserWithBatch($suratId, $targetUserId, $batch);
 
-        // Update status surat generik
-        $this->db->query("UPDATE surat SET status='MENUNGGU_DISPOSISI' WHERE id=" . (int) $suratId);
+        // Update status surat: gunakan format final MENUNGGU_DISPOSISI_<ROLE>
+        try {
+            $row = Database::fetchOne("SELECT UPPER(COALESCE(role,'')) AS role_u FROM user WHERE id=? LIMIT 1", [$targetUserId]);
+            $role = $row['role_u'] ?? '';
+            $roleNormalized = preg_replace('/[^A-Z0-9]+/', '_', $role);
+            $status = 'MENUNGGU_DISPOSISI' . ($roleNormalized ? ('_' . $roleNormalized) : '');
+
+            $stmt = $this->db->prepare("UPDATE surat SET status=? WHERE id=?");
+            $stmt->bind_param('si', $status, $suratId);
+            $stmt->execute();
+        } catch (\Throwable $e) {
+            // Jangan gagalkan alur hanya karena update status, cukup catat log
+            error_log('requestDisposition: gagal update status surat_id=' . $suratId . ' => ' . $e->getMessage());
+        }
 
         // Log opsional
         try {
@@ -270,6 +423,58 @@ class SuratFunctions
         } catch (\Throwable $e) {
         }
 
+        return true;
+    }
+
+    /**
+     * Minta disposisi ke banyak target sekaligus (paralel)
+     */
+    public function requestDispositionMulti(int $suratId, array $targetUserIds, int $byUserId, ?string $note = null): bool
+    {
+        // Sanitasi dan unik
+        $ids = array_values(array_unique(array_map('intval', $targetUserIds)));
+        if (count($ids) === 0) {
+            return false;
+        }
+
+        // Arsipkan tugas aktif milik pengaju (sekali saja)
+        $this->closeActiveForUser($suratId, $byUserId);
+
+        // Tambah tugas aktif untuk semua target (dengan batch yang sama)
+        $batch = substr(bin2hex(random_bytes(8)), 0, 16);
+        foreach ($ids as $uid) {
+            if ($uid <= 0)
+                continue;
+            $this->addActiveForUserWithBatch($suratId, $uid, $batch);
+        }
+
+        // Update status: jika semua target memiliki role yang sama, gunakan MENUNGGU_DISPOSISI_<ROLE>,
+        // jika beragam/multi-role maka gunakan MENUNGGU_DISPOSISI (umum)
+        try {
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $params = $ids;
+            $rows = Database::fetchAll("SELECT DISTINCT UPPER(COALESCE(role,'')) AS role_u FROM user WHERE id IN ($placeholders)", $params);
+            $roles = array_values(array_filter(array_map(fn($r) => $r['role_u'] ?? '', $rows)));
+            $status = 'MENUNGGU_DISPOSISI';
+            if (count($roles) === 1) {
+                $roleNormalized = preg_replace('/[^A-Z0-9]+/', '_', $roles[0]);
+                if ($roleNormalized !== '') {
+                    $status .= '_' . $roleNormalized;
+                }
+            }
+            $stmt = $this->db->prepare("UPDATE surat SET status=? WHERE id=?");
+            $stmt->bind_param('si', $status, $suratId);
+            $stmt->execute();
+        } catch (\Throwable $e) {
+            error_log('requestDispositionMulti: gagal update status surat_id=' . $suratId . ' => ' . $e->getMessage());
+        }
+
+        // Log opsional
+        try {
+            $line = date('c') . "\treq_dispo_multi\tsurat_id=$suratId\tto_users=" . implode(',', $ids) . "\tby=$byUserId\tnote=" . str_replace(["\n", "\t"], ' ', (string) $note) . "\n";
+            @file_put_contents(__DIR__ . '/../logs/disposisi.log', $line, FILE_APPEND);
+        } catch (\Throwable $e) {
+        }
         return true;
     }
 
@@ -293,7 +498,13 @@ class SuratFunctions
         }
 
         // Update status jadi SIAP_DISEBARKAN
-        $this->db->query("UPDATE surat SET status='SIAP_DISEBARKAN' WHERE id=" . (int) $suratId);
+        // Catatan: Pada database lama kolom `status` bisa berupa ENUM lama sehingga update bisa gagal.
+        // Agar tidak menyebabkan 500, tangkap error dan log saja; migrasi schema tetap direkomendasikan.
+        try {
+            $this->db->query("UPDATE surat SET status='SIAP_DISEBARKAN' WHERE id=" . (int) $suratId);
+        } catch (\Throwable $e) {
+            error_log('submitDisposition: gagal update status surat_id=' . $suratId . ' => ' . $e->getMessage());
+        }
         return true;
     }
 
@@ -308,8 +519,12 @@ class SuratFunctions
         foreach ($targetUserIds as $uid) {
             $this->addActiveForUser($suratId, (int) $uid);
         }
-        // Update status surat
-        $this->db->query("UPDATE surat SET status='TERDISTRIBUSI' WHERE id=" . (int) $suratId);
+        // Update status surat akhir
+        try {
+            $this->db->query("UPDATE surat SET status='SELESAI' WHERE id=" . (int) $suratId);
+        } catch (\Throwable $e) {
+            error_log('finalDistribution: gagal update status surat_id=' . $suratId . ' => ' . $e->getMessage());
+        }
         return true;
     }
 }

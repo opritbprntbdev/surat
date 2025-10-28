@@ -518,6 +518,24 @@ body {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
+/* Typeahead (custom) */
+.typeahead { position: relative; }
+.typeahead-panel {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 2000;
+    background: #fff;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    max-height: 220px;
+    overflow: auto;
+}
+.typeahead-item { padding: 10px 12px; cursor: pointer; }
+.typeahead-item:hover, .typeahead-item.active { background: #f1f3f4; }
+
 /* Loading Spinner */
 .loading-spinner {
     position: fixed;

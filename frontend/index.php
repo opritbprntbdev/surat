@@ -22,6 +22,12 @@
                     </path>
                 </svg>
             </button>
+            <button id="filter-unanswered-btn" class="refresh-btn" title="Tampilkan yang belum dijawab" style="margin-left:6px;">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span class="hide-on-mobile" style="margin-left:4px; font-size:12px;">Belum Dijawab</span>
+            </button>
         </div>
         <div class="header-center">
             <div class="search-container">

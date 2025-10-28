@@ -2,6 +2,7 @@ const App = {
   state: {
     suratList: [],
     currentSuratId: null,
+    filterMyUnanswered: false,
   },
 
   init() {
@@ -24,6 +25,16 @@ const App = {
     if (refreshBtn) {
       refreshBtn.addEventListener("click", () => this.loadSurat());
     }
+
+    const filterBtn = Utils.$('#filter-unanswered-btn');
+    if (filterBtn) {
+      filterBtn.addEventListener('click', () => {
+        this.state.filterMyUnanswered = !this.state.filterMyUnanswered;
+        filterBtn.classList.toggle('active', this.state.filterMyUnanswered);
+        filterBtn.title = this.state.filterMyUnanswered ? 'Menampilkan surat yang belum Anda jawab' : 'Tampilkan yang belum dijawab';
+        this.loadSurat();
+      });
+    }
   },
 
   async loadSurat() {
@@ -31,7 +42,9 @@ const App = {
     if (!emailList) return;
     emailList.innerHTML = Components.createLoadingState("Memuat surat...");
     try {
-      const response = await API.getSuratList();
+      const params = {};
+      if (this.state.filterMyUnanswered) params.my_unanswered = 1;
+      const response = await API.getSuratList(params);
       this.state.suratList = response.data.data;
       this.renderSuratList();
     } catch (error) {
@@ -114,6 +127,32 @@ const App = {
         }
       }
 
+      // Jika penerima aktif bukan UMUM, wire submit disposisi
+      const btnSubmitDisp = content.querySelector('#btn-submit-disp');
+      if (btnSubmitDisp) {
+        btnSubmitDisp.addEventListener('click', async ()=>{
+          const textEl = content.querySelector('#disp-text');
+          const text = (textEl && textEl.value ? textEl.value.trim() : '');
+          if (!text) { alert('Teks disposisi wajib diisi'); return; }
+          try{
+            const base = (window.API_BASE || '/surat/backend/api').replace(/\/$/, '');
+            const resp = await fetch(`${base}/disposisi.php?action=submit`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              body: JSON.stringify({ surat_id: suratData.id, text })
+            });
+            const json = await resp.json();
+            if (!resp.ok || json.success === false) throw new Error(json.error || json.message || 'Gagal');
+            // After submitting, reload list
+            App.loadSurat();
+            detailPane.innerHTML = Components.createEmptyState('Berhasil', 'Disposisi tersimpan dan surat dikembalikan ke UMUM.');
+          }catch(err){
+            alert(err.message || 'Gagal menyimpan disposisi');
+          }
+        });
+      }
+
       // Wire up PDF and Zoom buttons
       const pdfBtn = content.querySelector(".pdf-btn");
       if (pdfBtn) {
@@ -173,8 +212,12 @@ const App = {
         <div class="modal-body">
           <div class="form-group">
             <label for="disp-to">Kepada (User)</label>
-            <input type="text" id="disp-to" class="form-input" placeholder="Cari nama user..." list="disp-list" autocomplete="off" />
-            <datalist id="disp-list"></datalist>
+            <div class="typeahead">
+              <input type="text" id="disp-to" class="form-input" placeholder="Cari nama user..." autocomplete="off" />
+              <button class="btn" id="disp-add" type="button" style="margin-left:6px;">Tambah</button>
+            </div>
+            <div id="disp-panel" class="typeahead-panel hidden"></div>
+            <div id="disp-chips" class="chips" style="margin-top:6px;"></div>
           </div>
           <div class="form-group">
             <label for="disp-note">Catatan</label>
@@ -199,19 +242,46 @@ const App = {
     });
     modal.querySelector("#disp-cancel").addEventListener("click", close);
 
-    // Typeahead users
-    const input = modal.querySelector("#disp-to");
-    const list = modal.querySelector("#disp-list");
+  // Typeahead users (custom UI) + multi chips
+  const input = modal.querySelector("#disp-to");
+  const addBtn = modal.querySelector('#disp-add');
+  const chips = modal.querySelector('#disp-chips');
+  const panel = modal.querySelector("#disp-panel");
     let lastQ = "";
     let t = null;
-    // Load default suggestions on focus (empty query)
-    input.addEventListener("focus", () => {
-      triggerFetch("");
-    });
+    let items = [];
+    let activeIndex = -1;
+  const selected = new Map(); // id -> label
+
+    input.addEventListener("focus", () => triggerFetch(""));
     input.addEventListener("input", () => {
-      const q = input.value.trim();
-      triggerFetch(q);
+      activeIndex = -1;
+      triggerFetch(input.value.trim());
     });
+    input.addEventListener("keydown", (e) => {
+      if (panel.classList.contains("hidden")) return;
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        activeIndex = Math.min(activeIndex + 1, items.length - 1);
+        renderPanel();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        activeIndex = Math.max(activeIndex - 1, 0);
+        renderPanel();
+      } else if (e.key === "Enter") {
+        if (activeIndex >= 0) {
+          e.preventDefault();
+          pick(items[activeIndex]);
+        }
+      } else if (e.key === "Escape") {
+        hidePanel();
+      }
+    });
+    document.addEventListener("click", (e) => {
+      if (!modal.contains(e.target)) return; // only modal scope
+      if (!panel.contains(e.target) && e.target !== input) hidePanel();
+    });
+
     function triggerFetch(q){
       if (q === lastQ) return;
       lastQ = q;
@@ -221,31 +291,60 @@ const App = {
           const base = (window.API_BASE || '/surat/backend/api').replace(/\/$/, '');
           const res = await fetch(`${base}/recipients.php?q=` + encodeURIComponent(q), { credentials: "same-origin" });
           const json = await res.json();
-          list.innerHTML = "";
-          (json.data || [])
-            .filter((x) => x.type === "USER")
-            .forEach((x) => {
-              const opt = document.createElement("option");
-              opt.value = x.label;
-              opt.dataset.id = x.id;
-              list.appendChild(opt);
-            });
-        } catch {}
-      }, 200);
+          items = (json.data || []).filter(x=>x.type==='USER');
+          activeIndex = items.length ? 0 : -1;
+          renderPanel();
+        } catch { items = []; renderPanel(); }
+      }, 150);
+    }
+    function renderPanel(){
+      panel.innerHTML = '';
+      if (!items.length) { hidePanel(); return; }
+      const rect = input.getBoundingClientRect();
+      panel.style.width = input.offsetWidth + 'px';
+      panel.classList.remove('hidden');
+      items.forEach((x, idx)=>{
+        const div = document.createElement('div');
+        div.className = 'typeahead-item' + (idx===activeIndex ? ' active' : '');
+        div.textContent = x.label;
+        div.addEventListener('mousedown', (e)=>{ e.preventDefault(); pick(x); });
+        panel.appendChild(div);
+      });
+    }
+    function pick(x){
+      if (!selected.has(x.id)) {
+        selected.set(x.id, x.label);
+        renderChips();
+      }
+      input.value = '';
+      hidePanel();
+    }
+    function hidePanel(){ panel.classList.add('hidden'); }
+
+    if (addBtn) {
+      addBtn.addEventListener('click', () => {
+        if (activeIndex >= 0 && items[activeIndex]) {
+          pick(items[activeIndex]);
+          return;
+        }
+        // no active; ignore
+      });
     }
 
-    const resolveUserId = () => {
-      const val = input.value.trim();
-      const opt = Array.from(list.options).find((o) => o.value === val);
-      return opt ? parseInt(opt.dataset.id, 10) : NaN;
-    };
+    function renderChips(){
+      chips.innerHTML = '';
+      selected.forEach((label, id) => {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.innerHTML = `${'${'}label${'}'} <span class="remove" title="Hapus">&times;</span>`;
+        chip.querySelector('.remove').addEventListener('click', ()=>{ selected.delete(id); renderChips(); });
+        chips.appendChild(chip);
+      });
+    }
 
     modal.querySelector("#disp-send").addEventListener("click", async () => {
-      const userId = resolveUserId();
-      if (!userId || Number.isNaN(userId)) {
-        alert("Pilih penerima dari daftar.");
-        return;
-      }
+      const ids = Array.from(selected.keys());
+      if (!ids.length) { alert('Tambahkan minimal satu penerima.'); return; }
       const note = modal.querySelector("#disp-note").value.trim();
       try {
         const base = (window.API_BASE || '/surat/backend/api').replace(/\/$/, '');
@@ -253,11 +352,11 @@ const App = {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "same-origin",
-          body: JSON.stringify({ surat_id: surat.id, target_user_id: userId, note }),
+          body: JSON.stringify({ surat_id: surat.id, target_user_ids: ids, note }),
         });
         const json = await resp.json();
         if (!resp.ok || json.success === false)
-          throw new Error(json.message || "Gagal");
+          throw new Error(json.error || json.message || "Gagal");
         close();
         // Refresh list and detail
         App.loadSurat();

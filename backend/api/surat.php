@@ -47,7 +47,9 @@ try {
         $box = isset($_GET['box']) ? strtolower($_GET['box']) : null;
         $role = strtoupper($_SESSION['role'] ?? 'CABANG');
         $userId = (int)($_SESSION['user_id']);
-        $result = $suratFunctions->getSuratList($box, $role, $userId);
+        $opts = [];
+        if (!empty($_GET['my_unanswered'])) { $opts['my_unanswered'] = true; }
+        $result = $suratFunctions->getSuratList($box, $role, $userId, $opts);
         successResponse($result);
     }
 

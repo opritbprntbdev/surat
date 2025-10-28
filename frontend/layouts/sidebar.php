@@ -51,9 +51,18 @@ $isUmum = strtoupper($role) === 'UMUM';
                 <span>Surat Terkirim</span>
             </a>
 
+            <!-- Disposisi Saya -->
+            <a href="<?php echo $base_url; ?>pages/surat/my_dispositions.php"
+                class="nav-item <?php echo (strpos($current_path, '/pages/surat/my_dispositions.php') !== false) ? 'active' : ''; ?>">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Disposisi Saya</span>
+            </a>
+
             <!-- Arsip -->
-            <a href="<?php echo $base_url; ?>arsip.php"
-                class="nav-item <?php echo ($current_page == 'arsip.php') ? 'active' : ''; ?>">
+            <a href="<?php echo $base_url; ?>pages/surat/archive.php"
+                class="nav-item <?php echo (strpos($current_path, '/pages/surat/archive.php') !== false) ? 'active' : ''; ?>">
                 <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">

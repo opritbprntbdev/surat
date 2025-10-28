@@ -38,11 +38,12 @@ try {
         case 'request_disposition':
         case 'request': {
             $surat_id = (int)($payload['surat_id'] ?? 0);
-            $target_user_id = (int)($payload['target_user_id'] ?? 0);
             $note = $payload['note'] ?? null;
+            $targetsArr = $payload['target_user_ids'] ?? null;
+            $target_user_id = (int)($payload['target_user_id'] ?? 0);
 
-            if ($surat_id <= 0 || $target_user_id <= 0) {
-                errorResponse('Parameter tidak lengkap (surat_id, target_user_id).', 422);
+            if ($surat_id <= 0) {
+                errorResponse('Parameter tidak lengkap (surat_id).', 422);
             }
 
             // Hanya UMUM atau assignee aktif yang boleh meneruskan permintaan disposisi
@@ -50,8 +51,18 @@ try {
                 errorResponse('Tidak berwenang melakukan aksi ini.', 403);
             }
 
-            $suratFn->requestDisposition($surat_id, $target_user_id, $userId, $note);
-            successResponse(['surat_id' => $surat_id, 'to' => $target_user_id], 'Permintaan disposisi telah dikirim.');
+            if (is_array($targetsArr) && count($targetsArr) > 0) {
+                // Multi target
+                $suratFn->requestDispositionMulti($surat_id, $targetsArr, $userId, $note);
+                successResponse(['surat_id' => $surat_id, 'targets' => array_values($targetsArr)], 'Permintaan disposisi ke banyak penerima telah dikirim.');
+            } else {
+                // Single target
+                if ($target_user_id <= 0) {
+                    errorResponse('Parameter tidak lengkap (target_user_id).', 422);
+                }
+                $suratFn->requestDisposition($surat_id, $target_user_id, $userId, $note);
+                successResponse(['surat_id' => $surat_id, 'to' => $target_user_id], 'Permintaan disposisi telah dikirim.');
+            }
             break;
         }
 
