@@ -964,3 +964,41 @@ a {
 a:hover {
   text-decoration: none;
 }
+
+/* ===== Tracking Timeline Styles ===== */
+.tracking-detail { padding: 16px; }
+.tracking-header { margin-bottom: 12px; }
+.tracking-subject { margin: 0 0 4px; font-size: 18px; line-height: 1.35; }
+.tracking-meta { color: #5f6368; font-size: 13px; }
+
+.timeline { position: relative; }
+.timeline-day { position: relative; padding-left: 120px; }
+.timeline-day + .timeline-day { margin-top: 12px; }
+.timeline-day-label { position: absolute; left: 0; top: 0; width: 110px; text-align: right; color: #5f6368; font-size: 12px; }
+
+.timeline-item { display: grid; grid-template-columns: 110px 20px 1fr; gap: 8px; align-items: start; }
+.timeline-item + .timeline-item { margin-top: 8px; }
+.timeline-time { grid-column: 1/2; color: #5f6368; font-size: 12px; text-align: right; }
+.timeline-marker { grid-column: 2/3; position: relative; min-height: 24px; display:flex; align-items:flex-start; justify-content:center; }
+.timeline-dot { width: 8px; height: 8px; border-radius: 50%; background: #1a73e8; display:block; margin-top: 6px; }
+.timeline-line { position: absolute; top: 14px; bottom: -8px; width: 2px; background: #e0e0e0; left: 9px; }
+.timeline-content { grid-column: 3/4; }
+.timeline-title { font-weight: 600; font-size: 14px; margin-bottom: 2px; color: #202124; }
+.timeline-desc { font-size: 13px; color: #3c4043; white-space: pre-wrap; }
+
+/* Variasi warna sesuai tipe event */
+.timeline-received .timeline-dot { background: #34a853; }
+.timeline-acted .timeline-dot { background: #fbbc04; }
+.timeline-disposition .timeline-dot { background: #1a73e8; }
+
+@media (max-width: 767px) {
+  .tracking-detail { padding: 12px; }
+  .tracking-subject { font-size: 16px; }
+  .tracking-meta { font-size: 12px; }
+  .timeline-day { padding-left: 0; }
+  .timeline-day-label { position: static; width: auto; text-align: left; margin: 6px 0; }
+  .timeline-item { grid-template-columns: 86px 18px 1fr; }
+  .timeline-time { font-size: 11px; }
+  .timeline-title { font-size: 13px; }
+  .timeline-desc { font-size: 12px; }
+}

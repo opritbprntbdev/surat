@@ -186,9 +186,9 @@ const Components = {
             .map(
               (d) => `
             <li><strong>${Utils.escapeHtml(d.user_nama || "Pengguna")}</strong>
-              (${Utils.formatDateTimeLabel(d.created_at)})<br/>${Utils.escapeHtml(
-                d.disposition_text || ""
-              )}
+              (${Utils.formatDateTimeLabel(
+                d.created_at
+              )})<br/>${Utils.escapeHtml(d.disposition_text || "")}
             </li>`
             )
             .join("");
@@ -249,7 +249,7 @@ const Components = {
   },
 
   createLoadingState(message = "Loading...") {
-    const msg = (message == null) ? 'Loading...' : String(message);
+    const msg = message == null ? "Loading..." : String(message);
     return `
       <div class="page-content">
         <div style="display:flex;align-items:center;gap:8px;color:#5f6368;">
@@ -259,37 +259,163 @@ const Components = {
       </div>`;
   },
   createErrorState(title, message, retryCallback) {
-    const t = (title == null) ? 'Terjadi Kesalahan' : String(title);
-    const m = (message == null) ? 'Gagal memuat data.' : String(message);
-    const id = 'retry-'+Math.random().toString(36).slice(2);
+    const t = title == null ? "Terjadi Kesalahan" : String(title);
+    const m = message == null ? "Gagal memuat data." : String(message);
+    const id = "retry-" + Math.random().toString(36).slice(2);
     const html = `
       <div class="page-content">
         <div class="card">
           <div class="card-header"><strong>${Utils.escapeHtml(t)}</strong></div>
           <div class="card-body">
             <p style="margin:0 0 8px;color:#5f6368;">${Utils.escapeHtml(m)}</p>
-            ${retryCallback ? `<button id="${id}" class="btn btn-secondary">Coba Lagi</button>` : ''}
+            ${
+              retryCallback
+                ? `<button id="${id}" class="btn btn-secondary">Coba Lagi</button>`
+                : ""
+            }
           </div>
         </div>
       </div>`;
     // Kembalikan HTML; caller boleh set innerHTML, lalu optional wire tombol
-    setTimeout(()=>{
+    setTimeout(() => {
       if (retryCallback) {
         const btn = document.getElementById(id);
-        if (btn) btn.addEventListener('click', retryCallback);
+        if (btn) btn.addEventListener("click", retryCallback);
       }
-    },0);
+    }, 0);
     return html;
   },
   createEmptyState(title, message) {
-    const t = (title == null) ? 'Kosong' : String(title);
-    const m = (message == null) ? '' : String(message);
+    const t = title == null ? "Kosong" : String(title);
+    const m = message == null ? "" : String(message);
     return `
       <div class="page-content">
         <div style="color:#5f6368;">
-          <div style="font-weight:600;margin-bottom:4px;">${Utils.escapeHtml(t)}</div>
-          ${m ? `<div>${Utils.escapeHtml(m)}</div>` : ''}
+          <div style="font-weight:600;margin-bottom:4px;">${Utils.escapeHtml(
+            t
+          )}</div>
+          ${m ? `<div>${Utils.escapeHtml(m)}</div>` : ""}
         </div>
       </div>`;
+  },
+
+  /**
+   * BARU: Komponen khusus halaman Tracking – hanya menampilkan timeline perjalanan surat.
+   */
+  createTrackingDetail(surat) {
+    const wrap = document.createElement("div");
+    wrap.className = "tracking-detail";
+
+    // Header ringkas
+    const header = document.createElement("div");
+    header.className = "tracking-header";
+    header.innerHTML = `
+      <div class="tracking-title">
+        <h2 class="tracking-subject">${Utils.escapeHtml(
+          surat.perihal || "Surat"
+        )}</h2>
+        <div class="tracking-meta">
+          <span>Nomor: ${Utils.escapeHtml(surat.nomor_surat || "-")}</span>
+          <span> • </span>
+          <span>Tanggal: ${Utils.formatDateTimeLabel(
+            surat.tanggal_surat
+          )}</span>
+        </div>
+      </div>
+    `;
+    wrap.appendChild(header);
+
+    // Bangun event timeline dari routing + dispositions
+    const events = [];
+    const routing = Array.isArray(surat.routing) ? surat.routing : [];
+    routing.forEach((r) => {
+      if (r.diterima_at) {
+        events.push({
+          ts: r.diterima_at,
+          title: `Diterima oleh ${r.user_nama || "Pengguna"}`,
+          desc: `Status: ${r.tipe_penerima || "-"}`,
+          type: "received",
+        });
+      }
+      if (r.ditindak_at) {
+        events.push({
+          ts: r.ditindak_at,
+          title: `Ditindak oleh ${r.user_nama || "Pengguna"}`,
+          desc: "",
+          type: "acted",
+        });
+      }
+    });
+    const dispos = Array.isArray(surat.dispositions) ? surat.dispositions : [];
+    dispos.forEach((d) => {
+      events.push({
+        ts: d.created_at,
+        title: `Disposisi oleh ${d.user_nama || "Pengguna"}`,
+        desc: Utils.escapeHtml(d.disposition_text || ""),
+        type: "disposition",
+      });
+    });
+
+    // Sort kronologis menaik (bawah paling lama) lalu tampil seperti kurir (atas terbaru)
+    events.sort((a, b) => new Date(a.ts) - new Date(b.ts));
+
+    // Render timeline
+    const timeline = document.createElement("div");
+    timeline.className = "timeline";
+
+    if (!events.length) {
+      timeline.innerHTML = `<p style="color:#5f6368"><i>Belum ada jejak perjalanan.</i></p>`;
+    } else {
+      // Grup per hari (YYYY-MM-DD) agar mudah dibaca
+      const groups = new Map();
+      events.forEach((ev) => {
+        const dayKey = new Date(ev.ts).toISOString().slice(0, 10);
+        if (!groups.has(dayKey)) groups.set(dayKey, []);
+        groups.get(dayKey).push(ev);
+      });
+
+      // Tampilkan dari terbaru ke terlama per grup (grup terbaru di atas)
+      const dayKeys = Array.from(groups.keys()).sort(
+        (a, b) => new Date(b) - new Date(a)
+      );
+      dayKeys.forEach((dayKey) => {
+        const day = new Date(dayKey + "T00:00:00");
+        const dayLabel = new Intl.DateTimeFormat("id-ID", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          timeZone: "Asia/Makassar",
+        }).format(day);
+        const section = document.createElement("div");
+        section.className = "timeline-day";
+        section.innerHTML = `<div class="timeline-day-label">${dayLabel}</div>`;
+
+        const items = groups
+          .get(dayKey)
+          .slice()
+          .sort((a, b) => new Date(b.ts) - new Date(a.ts));
+        items.forEach((ev) => {
+          const item = document.createElement("div");
+          item.className = `timeline-item timeline-${ev.type}`;
+          item.innerHTML = `
+            <div class="timeline-time">${Utils.formatDateTimeLabel(ev.ts)}</div>
+            <div class="timeline-marker">
+              <span class="timeline-dot"></span>
+              <span class="timeline-line"></span>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-title">${Utils.escapeHtml(ev.title)}</div>
+              ${ev.desc ? `<div class="timeline-desc">${ev.desc}</div>` : ""}
+            </div>
+          `;
+          section.appendChild(item);
+        });
+
+        timeline.appendChild(section);
+      });
+    }
+
+    wrap.appendChild(timeline);
+    return wrap;
   },
 };

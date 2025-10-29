@@ -59,6 +59,11 @@ try {
         if (isset($_GET['q'])) { $opts['q'] = trim((string)$_GET['q']); }
         if (!empty($_GET['page'])) { $opts['page'] = (int)$_GET['page']; }
         if (!empty($_GET['page_size'])) { $opts['page_size'] = (int)$_GET['page_size']; }
+        // Tracking-specific enrich and filters
+        if (!empty($_GET['tracking'])) { $opts['tracking'] = true; }
+        if (!empty($_GET['status'])) { $opts['status'] = strtoupper((string)$_GET['status']); }
+        if (!empty($_GET['sort'])) { $opts['sort'] = strtolower((string)$_GET['sort']); }
+        if (!empty($_GET['only_mine'])) { $opts['only_mine'] = true; }
         $result = $suratFunctions->getSuratList($box, $role, $userId, $opts);
         successResponse($result);
     }

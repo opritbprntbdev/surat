@@ -86,7 +86,8 @@
                 try{
                     const d = await API.getSuratDetail(s.id);
                     detailPane.innerHTML = '';
-                    detailPane.appendChild(Components.createSuratDetail(d.data));
+                    // Khusus tracking: tampilkan hanya timeline perjalanan
+                    detailPane.appendChild(Components.createTrackingDetail(d.data));
                 }catch(err){
                     detailPane.innerHTML = Components.createErrorState('Gagal memuat detail', err.message, ()=>{});
                 }
