@@ -1,3 +1,27 @@
+# Ringkasan Pekerjaan – 29 Okt 2025
+
+Berikut 4 hal yang dikerjakan dan dirapikan hari ini:
+
+1) Perbaikan scroll dan layout di mobile
+  - Mengubah `body` menjadi `overflow-y: auto` (menghindari halaman “terkunci”)
+  - Menyesuaikan `.gmail-container` (height auto, min-height 100vh) dan `.email-content` (overflow visible)
+  - Hasil: daftar bisa digulir normal di semua halaman; jumlah item yang tampil sesuai dengan pager
+
+2) Overlay detail di Inbox & Tracking lebih responsif
+  - Overlay aktif segera saat item diklik pada mobile dan menampilkan loading state lebih cepat
+  - Tracking: render timeline-only, tambah tombol kembali (mobile), dan tombol “X” (desktop) untuk menutup panel
+  - Inbox/detail biasa: tambah tombol “X” kecil di header untuk menutup panel (desktop)
+
+3) Pintasan keyboard: ESC untuk menutup panel
+  - Mobile: ESC menutup overlay panel baca
+  - Desktop: ESC mengembalikan panel kanan ke placeholder dan menghapus seleksi item; jika tidak ada panel, ESC tetap menutup sidebar
+
+4) Perapihan tampilan mobile (spacing)
+  - Memadatkan padding/margin pada header, pager, item daftar, dan panel detail
+  - Menjaga desktop tetap tidak berubah; tampilan mobile menjadi lebih lega dan ringkas
+
+---
+
 # Gmail Clone - HTML/CSS/JavaScript + PHP Native
 A complete Gmail clone built with vanilla HTML, CSS, JavaScript and PHP Native (PHP 8.1+ with MySQLi).
 
