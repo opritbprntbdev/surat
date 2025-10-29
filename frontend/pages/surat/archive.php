@@ -43,6 +43,8 @@
         </div>
     </header>
 
+    <div class="list-pagination"><div id="pager" class="pager"></div></div>
+
     <div class="email-content">
         <div class="email-list" id="email-list"></div>
         <div class="email-detail" id="email-detail">
@@ -63,7 +65,21 @@
     const searchInput = document.getElementById('page-search-input');
     if (!emailList) return;
 
+    // Delegated handler: toggle star without opening detail
+    emailList.addEventListener('click', (e)=>{
+        const starBtn = e.target.closest && e.target.closest('.email-star');
+        if (starBtn){
+            e.stopPropagation();
+            const suratId = Number(starBtn.dataset.suratId);
+            const isStarred = starBtn.classList.contains('starred');
+            API.toggleStar(suratId, !isStarred)
+                .then(()=>{ starBtn.classList.toggle('starred', !isStarred); })
+                .catch(()=>{});
+        }
+    });
+
     let rows = [];
+    let page = 1, pageSize = parseInt(localStorage.getItem('SURAT_PAGE_SIZE')||'',10) || 50, total = 0;
 
     function render(list){
         emailList.innerHTML = '';
@@ -75,6 +91,24 @@
                     const d = await API.getSuratDetail(s.id);
                     detailPane.innerHTML = '';
                     detailPane.appendChild(Components.createSuratDetail(d.data));
+
+                    // Tandai sebagai dibaca dan segarkan badge sidebar
+                    try {
+                        await API.markRead(s.id);
+                        item.classList.remove('unread');
+                        if (window.App && typeof App.refreshUnreadBadge === 'function') {
+                            App.refreshUnreadBadge();
+                        } else {
+                            API.getUnreadCount().then(res => {
+                                const el = document.getElementById('inbox-unread-count');
+                                const n = Number(res?.data?.unread || 0);
+                                if (el) {
+                                    if (n > 0) { el.textContent = String(n); el.style.display = 'inline-block'; }
+                                    else { el.textContent = '0'; el.style.display = 'none'; }
+                                }
+                            }).catch(()=>{});
+                        }
+                    } catch {}
                 }catch(err){
                     detailPane.innerHTML = Components.createErrorState('Gagal memuat detail', err.message, ()=>{});
                 }
@@ -83,31 +117,62 @@
         });
     }
 
-    function applyFilter(){
-        const q = (searchInput && searchInput.value ? searchInput.value : '').toLowerCase().trim();
-        if (!q) { render(rows); return; }
-        const hit = (v)=> String(v||'').toLowerCase().includes(q);
-        const filtered = rows.filter(s => hit(s.perihal) || hit(s.pengirim_nama) || hit(s.nomor_surat) || hit(s.status) || hit(s.last_dispo_text));
-        render(filtered);
+    function renderPager(){
+        const pager = document.getElementById('pager');
+        if (!pager) return;
+        if (!total) { pager.innerHTML = ''; return; }
+        const pages = Math.max(1, Math.ceil(total / pageSize));
+        const start = (page-1)*pageSize + 1;
+        const end = Math.min(total, page*pageSize);
+        pager.innerHTML = `
+            <button class="btn" id="pager-prev" ${page<=1?'disabled':''}>&laquo; Prev</button>
+            <button class="btn" id="pager-next" ${page>=pages?'disabled':''}>Next &raquo;</button>
+            <span class="info">Halaman ${page} dari ${pages} • Menampilkan ${start}-${end} dari ${total}</span>
+            <span class="info" style="margin-left:auto">Per halaman</span>
+            <select id="page-size-select" class="page-size">
+              <option value="20">20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+        `;
+        const prev = document.getElementById('pager-prev');
+        const next = document.getElementById('pager-next');
+        if (prev) prev.onclick = ()=>{ if (page>1){ page--; loadArchive(); } };
+        if (next) next.onclick = ()=>{ if (page<pages){ page++; loadArchive(); } };
+        const sel = document.getElementById('page-size-select');
+        if (sel){
+            sel.value = String(pageSize);
+            sel.onchange = ()=>{
+                const v = parseInt(sel.value,10);
+                if (!isNaN(v)){
+                    localStorage.setItem('SURAT_PAGE_SIZE', String(v));
+                    pageSize = v; page = 1; loadArchive();
+                }
+            };
+        }
     }
 
     async function loadArchive(){
         emailList.innerHTML = Components.createLoadingState('Memuat arsip...');
         try{
-            const resp = await API.getSuratList({ box: 'archive' });
+            const q = (searchInput && searchInput.value ? searchInput.value.trim() : '');
+            const resp = await API.getSuratList({ box: 'archive', q, page, page_size: pageSize });
             rows = resp.data?.data || [];
+            total = Number(resp.data?.total || 0);
             if (!rows.length){
                 emailList.innerHTML = Components.createEmptyState('Arsip kosong', 'Belum ada surat di arsip.');
+                renderPager();
                 return;
             }
-            applyFilter();
+            render(rows);
+            renderPager();
         }catch(err){
             emailList.innerHTML = Components.createErrorState('Gagal memuat', err.message, loadArchive);
         }
     }
 
     if (searchInput){
-        const deb = Utils.debounce(applyFilter, 200);
+        const deb = Utils.debounce(()=>{ page = 1; loadArchive(); }, 200);
         ['input','keyup','change'].forEach(evt => searchInput.addEventListener(evt, deb));
     }
 

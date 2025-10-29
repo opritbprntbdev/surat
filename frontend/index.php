@@ -85,6 +85,11 @@
         </div>
     </header>
 
+    <!-- Toolbar Pagination -->
+    <div class="list-pagination" id="list-pagination">
+        <div id="pager" class="pager"></div>
+    </div>
+
     <!-- Area Konten Surat -->
     <div class="email-content">
         <div class="email-list" id="email-list"></div>

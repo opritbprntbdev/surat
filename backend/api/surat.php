@@ -42,6 +42,11 @@ try {
         } else {
             errorResponse('Surat tidak ditemukan', 404);
         }
+    } else if (!empty($_GET['unread_count'])) {
+        // Quick endpoint: jumlah surat AKTIF yang belum dibaca oleh user saat ini
+        $userId = (int)($_SESSION['user_id']);
+        $count = $suratFunctions->getUnreadCountForUser($userId);
+        successResponse(['unread' => $count]);
     } else {
         // Default: daftar surat, role-aware (UMUM inbox: MENUNGGU_UMUM; CABANG can use box=sent)
         $box = isset($_GET['box']) ? strtolower($_GET['box']) : null;
@@ -49,6 +54,11 @@ try {
         $userId = (int)($_SESSION['user_id']);
         $opts = [];
         if (!empty($_GET['my_unanswered'])) { $opts['my_unanswered'] = true; }
+        if (!empty($_GET['facet'])) { $opts['facet'] = $_GET['facet']; }
+        if (!empty($_GET['read'])) { $opts['read'] = $_GET['read']; }
+        if (isset($_GET['q'])) { $opts['q'] = trim((string)$_GET['q']); }
+        if (!empty($_GET['page'])) { $opts['page'] = (int)$_GET['page']; }
+        if (!empty($_GET['page_size'])) { $opts['page_size'] = (int)$_GET['page_size']; }
         $result = $suratFunctions->getSuratList($box, $role, $userId, $opts);
         successResponse($result);
     }

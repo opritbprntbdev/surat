@@ -70,6 +70,13 @@ class SuratFunctions
         $box = $box ? strtolower($box) : null;
         $myUnanswered = !empty($opts['my_unanswered']);
         $uid = (int) ($userId ?? 0);
+        $facet = strtoupper($opts['facet'] ?? 'ALL');
+        $readFilter = strtoupper($opts['read'] ?? 'ALL');
+        $q = isset($opts['q']) ? trim((string)$opts['q']) : '';
+        $page = isset($opts['page']) ? max(1, (int)$opts['page']) : 1;
+        $pageSize = isset($opts['page_size']) ? max(10, min(100, (int)$opts['page_size'])) : 50;
+        $offset = ($page - 1) * $pageSize;
+        $limitClause = " LIMIT $pageSize OFFSET $offset ";
 
         // Pastikan data lama telah memiliki routing dasar di surat_penerima
         $this->backfillSuratPenerima();
@@ -78,48 +85,81 @@ class SuratFunctions
         if ($userId) {
             if ($box === 'sent') {
                 // Surat terkirim oleh user ini
+                $where = " WHERE s.pengirim_id = ? ";
+                $params = [$userId];
+                if ($facet !== 'ALL') {
+                    $where .= " AND UPPER(COALESCE(pengirim.role,'')) = ? ";
+                    $params[] = $facet;
+                }
+                if ($readFilter === 'READ') $where .= " AND EXISTS(SELECT 1 FROM surat_read sr WHERE sr.surat_id=s.id AND sr.user_id={$uid}) ";
+                if ($readFilter === 'UNREAD') $where .= " AND NOT EXISTS(SELECT 1 FROM surat_read sr WHERE sr.surat_id=s.id AND sr.user_id={$uid}) ";
+                if ($readFilter === 'STARRED') $where .= " AND EXISTS(SELECT 1 FROM surat_star ss WHERE ss.surat_id=s.id AND ss.user_id={$uid}) ";
+                if ($readFilter === 'UNSTARRED') $where .= " AND NOT EXISTS(SELECT 1 FROM surat_star ss WHERE ss.surat_id=s.id AND ss.user_id={$uid}) ";
+                if ($q !== '') {
+                    $like = '%' . $this->db->real_escape_string($q) . '%';
+                    $where .= " AND (s.perihal LIKE ? OR s.nomor_surat LIKE ? OR s.status LIKE ? OR pengirim.nama_lengkap LIKE ? OR EXISTS(SELECT 1 FROM dispositions d2 WHERE d2.surat_id=s.id AND d2.disposition_text LIKE ?)) ";
+                    array_push($params, $like, $like, $like, $like, $like);
+                }
+
                 $sql = "
-                                  SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
-                                      pengirim.nama_lengkap as pengirim_nama,
-                                      UPPER(COALESCE(pengirim.role,'')) AS pengirim_role,
-                                                     (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id) AS dispo_count,
-                                                     (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id AND d.user_id = ?) AS my_dispo_count,
-                                                     (SELECT d.disposition_text FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_text,
-                                                     (SELECT d.created_at FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_created_at,
-                                                                     (SELECT u.role FROM dispositions d JOIN user u ON u.id=d.user_id WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_user_role,
-                                                     (
-                                                         SELECT COUNT(*) FROM surat_penerima sp2
-                                                         WHERE sp2.surat_id = s.id
-                                                             AND sp2.request_batch = (
-                                                                 SELECT sp3.request_batch FROM surat_penerima sp3
-                                                                 WHERE sp3.surat_id = s.id AND sp3.request_batch IS NOT NULL
-                                                                 ORDER BY sp3.diterima_at DESC LIMIT 1
-                                                             )
-                                                     ) AS progress_total,
-                                                     (
-                                                         SELECT COUNT(*) FROM surat_penerima sp2
-                                                         WHERE sp2.surat_id = s.id
-                                                             AND sp2.request_batch = (
-                                                                 SELECT sp3.request_batch FROM surat_penerima sp3
-                                                                 WHERE sp3.surat_id = s.id AND sp3.request_batch IS NOT NULL
-                                                                 ORDER BY sp3.diterima_at DESC LIMIT 1
-                                                             )
-                                                             AND sp2.tipe_penerima <> 'AKTIF'
-                                                                     ) AS progress_done,
-                                                                     EXISTS(SELECT 1 FROM surat_star ss WHERE ss.surat_id=s.id AND ss.user_id={$uid}) AS starred,
-                                                                     EXISTS(SELECT 1 FROM surat_read sr WHERE sr.surat_id=s.id AND sr.user_id={$uid}) AS is_read
-                                        FROM surat s
-                                        JOIN user pengirim ON s.pengirim_id = pengirim.id
-                                        WHERE s.pengirim_id = ?
-                                        ORDER BY s.tanggal_surat DESC
-                                        LIMIT 50";
-                $suratList = Database::fetchAll($sql, [$userId, $userId]);
-                $total = Database::fetchValue("SELECT COUNT(*) FROM surat WHERE pengirim_id = ?", [$userId]) ?? 0;
+                    SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
+                           pengirim.nama_lengkap as pengirim_nama,
+                           UPPER(COALESCE(pengirim.role,'')) AS pengirim_role,
+                           (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id) AS dispo_count,
+                           (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id AND d.user_id = ?) AS my_dispo_count,
+                           (SELECT d.disposition_text FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_text,
+                           (SELECT d.created_at FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_created_at,
+                           (SELECT u.role FROM dispositions d JOIN user u ON u.id=d.user_id WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_user_role,
+                           (
+                               SELECT COUNT(*) FROM surat_penerima sp2
+                               WHERE sp2.surat_id = s.id AND sp2.request_batch = (
+                                   SELECT sp3.request_batch FROM surat_penerima sp3
+                                   WHERE sp3.surat_id = s.id AND sp3.request_batch IS NOT NULL
+                                   ORDER BY sp3.diterima_at DESC LIMIT 1
+                               )
+                           ) AS progress_total,
+                           (
+                               SELECT COUNT(*) FROM surat_penerima sp2
+                               WHERE sp2.surat_id = s.id AND sp2.request_batch = (
+                                   SELECT sp3.request_batch FROM surat_penerima sp3
+                                   WHERE sp3.surat_id = s.id AND sp3.request_batch IS NOT NULL
+                                   ORDER BY sp3.diterima_at DESC LIMIT 1
+                               ) AND sp2.tipe_penerima <> 'AKTIF'
+                           ) AS progress_done,
+                           EXISTS(SELECT 1 FROM surat_star ss WHERE ss.surat_id=s.id AND ss.user_id={$uid}) AS starred,
+                           EXISTS(SELECT 1 FROM surat_read sr WHERE sr.surat_id=s.id AND sr.user_id={$uid}) AS is_read
+                    FROM surat s
+                    JOIN user pengirim ON s.pengirim_id = pengirim.id
+                    $where
+                    ORDER BY s.tanggal_surat DESC
+                    $limitClause
+                ";
+                $suratList = Database::fetchAll($sql, array_merge([$userId], $params));
+
+                // Total dengan filter yang sama
+                $countSql = "SELECT COUNT(*) FROM surat s JOIN user pengirim ON s.pengirim_id=pengirim.id $where";
+                $total = Database::fetchValue($countSql, $params) ?? 0;
                 return ['data' => $suratList, 'total' => $total];
             }
 
             if ($box === 'archive') {
                 // Arsip untuk user ini (bukan aktif)
+                $where = " WHERE sp.user_id = ? AND sp.tipe_penerima <> 'AKTIF' ";
+                $params = [$userId];
+                if ($facet !== 'ALL') {
+                    $where .= " AND UPPER(COALESCE(pengirim.role,'')) = ? ";
+                    $params[] = $facet;
+                }
+                if ($readFilter === 'READ') $where .= " AND EXISTS(SELECT 1 FROM surat_read sr WHERE sr.surat_id=s.id AND sr.user_id={$uid}) ";
+                if ($readFilter === 'UNREAD') $where .= " AND NOT EXISTS(SELECT 1 FROM surat_read sr WHERE sr.surat_id=s.id AND sr.user_id={$uid}) ";
+                if ($readFilter === 'STARRED') $where .= " AND EXISTS(SELECT 1 FROM surat_star ss WHERE ss.surat_id=s.id AND ss.user_id={$uid}) ";
+                if ($readFilter === 'UNSTARRED') $where .= " AND NOT EXISTS(SELECT 1 FROM surat_star ss WHERE ss.surat_id=s.id AND ss.user_id={$uid}) ";
+                if ($q !== '') {
+                    $like = '%' . $this->db->real_escape_string($q) . '%';
+                    $where .= " AND (s.perihal LIKE ? OR s.nomor_surat LIKE ? OR s.status LIKE ? OR pengirim.nama_lengkap LIKE ? OR EXISTS(SELECT 1 FROM dispositions d2 WHERE d2.surat_id=s.id AND d2.disposition_text LIKE ?)) ";
+                    array_push($params, $like, $like, $like, $like, $like);
+                }
+
                 $sql = "
                                   SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
                                       pengirim.nama_lengkap as pengirim_nama,
@@ -153,16 +193,29 @@ class SuratFunctions
                                         FROM surat_penerima sp
                                         JOIN surat s ON s.id = sp.surat_id
                                         JOIN user pengirim ON s.pengirim_id = pengirim.id
-                                        WHERE sp.user_id = ? AND sp.tipe_penerima <> 'AKTIF'
+                                        $where
                                         ORDER BY sp.diterima_at DESC
-                                        LIMIT 50";
-                $suratList = Database::fetchAll($sql, [$userId, $userId]);
-                $total = Database::fetchValue("SELECT COUNT(*) FROM surat_penerima WHERE user_id=? AND tipe_penerima<>'AKTIF'", [$userId]) ?? 0;
+                                        $limitClause";
+                $suratList = Database::fetchAll($sql, array_merge([$userId], $params));
+                $countSql = "SELECT COUNT(*) FROM surat_penerima sp JOIN surat s ON s.id=sp.surat_id JOIN user pengirim ON s.pengirim_id=pengirim.id $where";
+                $total = Database::fetchValue($countSql, $params) ?? 0;
                 return ['data' => $suratList, 'total' => $total];
             }
 
             if ($box === 'starred') {
                 // Daftar surat berbintang untuk user ini (semua status/kotak)
+                $where = " WHERE ss.user_id = ? ";
+                $params = [$userId];
+                if ($facet !== 'ALL') { $where .= " AND UPPER(COALESCE(pengirim.role,'')) = ? "; $params[] = $facet; }
+                if ($readFilter === 'READ') $where .= " AND EXISTS(SELECT 1 FROM surat_read sr WHERE sr.surat_id=s.id AND sr.user_id={$uid}) ";
+                if ($readFilter === 'UNREAD') $where .= " AND NOT EXISTS(SELECT 1 FROM surat_read sr WHERE sr.surat_id=s.id AND sr.user_id={$uid}) ";
+                if ($readFilter === 'UNSTARRED') $where .= " AND NOT EXISTS(SELECT 1 FROM surat_star ss2 WHERE ss2.surat_id=s.id AND ss2.user_id={$uid}) ";
+                if ($q !== '') {
+                    $like = '%' . $this->db->real_escape_string($q) . '%';
+                    $where .= " AND (s.perihal LIKE ? OR s.nomor_surat LIKE ? OR s.status LIKE ? OR pengirim.nama_lengkap LIKE ? OR EXISTS(SELECT 1 FROM dispositions d2 WHERE d2.surat_id=s.id AND d2.disposition_text LIKE ?)) ";
+                    array_push($params, $like, $like, $like, $like, $like);
+                }
+
                 $sql = "
                                   SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
                                       pengirim.nama_lengkap as pengirim_nama,
@@ -196,16 +249,30 @@ class SuratFunctions
                                         FROM surat_star ss
                                         JOIN surat s ON s.id = ss.surat_id
                                         JOIN user pengirim ON s.pengirim_id = pengirim.id
-                                        WHERE ss.user_id = ?
+                                        $where
                                         ORDER BY s.tanggal_surat DESC
-                                        LIMIT 50";
-                $suratList = Database::fetchAll($sql, [$userId, $userId]);
-                $total = Database::fetchValue("SELECT COUNT(*) FROM surat_star WHERE user_id = ?", [$userId]) ?? 0;
+                                        $limitClause";
+                $suratList = Database::fetchAll($sql, array_merge([$userId], $params));
+                $countSql = "SELECT COUNT(*) FROM surat_star ss JOIN surat s ON s.id=ss.surat_id JOIN user pengirim ON s.pengirim_id=pengirim.id $where";
+                $total = Database::fetchValue($countSql, $params) ?? 0;
                 return ['data' => $suratList, 'total' => $total];
             }
 
             if ($box === 'my_disposisi' || $box === 'my_dispo' || $box === 'my') {
                 // Daftar semua jawaban disposisi milik user ini
+                $where = " WHERE d.user_id = ? ";
+                $params = [$userId];
+                if ($facet !== 'ALL') { $where .= " AND UPPER(COALESCE(pengirim.role,'')) = ? "; $params[] = $facet; }
+                if ($readFilter === 'READ') $where .= " AND EXISTS(SELECT 1 FROM surat_read sr WHERE sr.surat_id=s.id AND sr.user_id={$uid}) ";
+                if ($readFilter === 'UNREAD') $where .= " AND NOT EXISTS(SELECT 1 FROM surat_read sr WHERE sr.surat_id=s.id AND sr.user_id={$uid}) ";
+                if ($readFilter === 'STARRED') $where .= " AND EXISTS(SELECT 1 FROM surat_star ss WHERE ss.surat_id=s.id AND ss.user_id={$uid}) ";
+                if ($readFilter === 'UNSTARRED') $where .= " AND NOT EXISTS(SELECT 1 FROM surat_star ss WHERE ss.surat_id=s.id AND ss.user_id={$uid}) ";
+                if ($q !== '') {
+                    $like = '%' . $this->db->real_escape_string($q) . '%';
+                    $where .= " AND (s.perihal LIKE ? OR s.nomor_surat LIKE ? OR s.status LIKE ? OR pengirim.nama_lengkap LIKE ? OR d.disposition_text LIKE ?) ";
+                    array_push($params, $like, $like, $like, $like, $like);
+                }
+
                 $sql = "
                                   SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
                                       pengirim.nama_lengkap as pengirim_nama,
@@ -239,11 +306,12 @@ class SuratFunctions
                                         FROM dispositions d
                                         JOIN surat s ON s.id = d.surat_id
                                         JOIN user pengirim ON s.pengirim_id = pengirim.id
-                                        WHERE d.user_id = ?
+                                        $where
                                         ORDER BY d.created_at DESC
-                                        LIMIT 50";
-                $suratList = Database::fetchAll($sql, [$userId, $userId]);
-                $total = Database::fetchValue("SELECT COUNT(*) FROM dispositions WHERE user_id=?", [$userId]) ?? 0;
+                                        $limitClause";
+                $suratList = Database::fetchAll($sql, array_merge([$userId], $params));
+                $countSql = "SELECT COUNT(*) FROM dispositions d JOIN surat s ON s.id=d.surat_id JOIN user pengirim ON s.pengirim_id=pengirim.id $where";
+                $total = Database::fetchValue($countSql, $params) ?? 0;
                 return ['data' => $suratList, 'total' => $total];
             }
 
@@ -286,10 +354,20 @@ class SuratFunctions
                                 WHERE sp.user_id = ? AND sp.tipe_penerima = 'AKTIF'
                                     AND NOT EXISTS (
                                         SELECT 1 FROM dispositions d2 WHERE d2.surat_id = s.id AND d2.user_id = ?
-                                    )
-                                ORDER BY sp.diterima_at DESC
-                                LIMIT 50";
-                $suratList = Database::fetchAll($sql, [$userId, $userId, $userId]);
+                                    )";
+                $params = [$userId, $userId];
+                if ($facet !== 'ALL') { $sql .= " AND UPPER(COALESCE(pengirim.role,'')) = ?"; $params[] = $facet; }
+                if ($readFilter === 'READ') $sql .= " AND EXISTS(SELECT 1 FROM surat_read sr WHERE sr.surat_id=s.id AND sr.user_id={$uid})";
+                if ($readFilter === 'UNREAD') $sql .= " AND NOT EXISTS(SELECT 1 FROM surat_read sr WHERE sr.surat_id=s.id AND sr.user_id={$uid})";
+                if ($readFilter === 'STARRED') $sql .= " AND EXISTS(SELECT 1 FROM surat_star ss WHERE ss.surat_id=s.id AND ss.user_id={$uid})";
+                if ($readFilter === 'UNSTARRED') $sql .= " AND NOT EXISTS(SELECT 1 FROM surat_star ss WHERE ss.surat_id=s.id AND ss.user_id={$uid})";
+                if ($q !== '') {
+                    $like = '%' . $this->db->real_escape_string($q) . '%';
+                    $sql .= " AND (s.perihal LIKE ? OR s.nomor_surat LIKE ? OR s.status LIKE ? OR pengirim.nama_lengkap LIKE ? OR EXISTS(SELECT 1 FROM dispositions d2 WHERE d2.surat_id=s.id AND d2.disposition_text LIKE ?))";
+                    array_push($params, $like, $like, $like, $like, $like);
+                }
+                $sql .= " ORDER BY sp.diterima_at DESC $limitClause";
+                $suratList = Database::fetchAll($sql, array_merge([$userId], $params));
             } else {
                 $sql = "
                                 SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
@@ -324,12 +402,39 @@ class SuratFunctions
                                 FROM surat_penerima sp
                                 JOIN surat s ON s.id = sp.surat_id
                                 JOIN user pengirim ON s.pengirim_id = pengirim.id
-                                WHERE sp.user_id = ? AND sp.tipe_penerima = 'AKTIF'
-                                ORDER BY sp.diterima_at DESC
-                                LIMIT 50";
-                $suratList = Database::fetchAll($sql, [$userId, $userId]);
+                                WHERE sp.user_id = ? AND sp.tipe_penerima = 'AKTIF'";
+                $params = [$userId];
+                if ($facet !== 'ALL') { $sql .= " AND UPPER(COALESCE(pengirim.role,'')) = ?"; $params[] = $facet; }
+                if ($readFilter === 'READ') $sql .= " AND EXISTS(SELECT 1 FROM surat_read sr WHERE sr.surat_id=s.id AND sr.user_id={$uid})";
+                if ($readFilter === 'UNREAD') $sql .= " AND NOT EXISTS(SELECT 1 FROM surat_read sr WHERE sr.surat_id=s.id AND sr.user_id={$uid})";
+                if ($readFilter === 'STARRED') $sql .= " AND EXISTS(SELECT 1 FROM surat_star ss WHERE ss.surat_id=s.id AND ss.user_id={$uid})";
+                if ($readFilter === 'UNSTARRED') $sql .= " AND NOT EXISTS(SELECT 1 FROM surat_star ss WHERE ss.surat_id=s.id AND ss.user_id={$uid})";
+                if ($q !== '') {
+                    $like = '%' . $this->db->real_escape_string($q) . '%';
+                    $sql .= " AND (s.perihal LIKE ? OR s.nomor_surat LIKE ? OR s.status LIKE ? OR pengirim.nama_lengkap LIKE ? OR EXISTS(SELECT 1 FROM dispositions d2 WHERE d2.surat_id=s.id AND d2.disposition_text LIKE ?))";
+                    array_push($params, $like, $like, $like, $like, $like);
+                }
+                $sql .= " ORDER BY sp.diterima_at DESC $limitClause";
+                $suratList = Database::fetchAll($sql, array_merge([$userId], $params));
             }
-            $total = Database::fetchValue("SELECT COUNT(*) FROM surat_penerima WHERE user_id=? AND tipe_penerima='AKTIF'", [$userId]) ?? 0;
+            // Hitung total berdasarkan filter yang sama (tanpa LIMIT)
+            $countSql = "SELECT COUNT(*) FROM surat_penerima sp JOIN surat s ON s.id=sp.surat_id JOIN user pengirim ON s.pengirim_id=pengirim.id WHERE sp.user_id=? AND sp.tipe_penerima='AKTIF'";
+            $countParams = [$userId];
+            if ($myUnanswered) {
+                $countSql .= " AND NOT EXISTS (SELECT 1 FROM dispositions d2 WHERE d2.surat_id=s.id AND d2.user_id=?)";
+                $countParams[] = $userId;
+            }
+            if ($facet !== 'ALL') { $countSql .= " AND UPPER(COALESCE(pengirim.role,'')) = ?"; $countParams[] = $facet; }
+            if ($readFilter === 'READ') $countSql .= " AND EXISTS(SELECT 1 FROM surat_read sr WHERE sr.surat_id=s.id AND sr.user_id={$uid})";
+            if ($readFilter === 'UNREAD') $countSql .= " AND NOT EXISTS(SELECT 1 FROM surat_read sr WHERE sr.surat_id=s.id AND sr.user_id={$uid})";
+            if ($readFilter === 'STARRED') $countSql .= " AND EXISTS(SELECT 1 FROM surat_star ss WHERE ss.surat_id=s.id AND ss.user_id={$uid})";
+            if ($readFilter === 'UNSTARRED') $countSql .= " AND NOT EXISTS(SELECT 1 FROM surat_star ss WHERE ss.surat_id=s.id AND ss.user_id={$uid})";
+            if ($q !== '') {
+                $like = '%' . $this->db->real_escape_string($q) . '%';
+                $countSql .= " AND (s.perihal LIKE ? OR s.nomor_surat LIKE ? OR s.status LIKE ? OR pengirim.nama_lengkap LIKE ? OR EXISTS(SELECT 1 FROM dispositions d2 WHERE d2.surat_id=s.id AND d2.disposition_text LIKE ?))";
+                array_push($countParams, $like, $like, $like, $like, $like);
+            }
+            $total = Database::fetchValue($countSql, $countParams) ?? 0;
             return ['data' => $suratList, 'total' => $total];
         }
 
@@ -346,6 +451,27 @@ class SuratFunctions
         $total = Database::fetchValue("SELECT COUNT(*) FROM surat") ?? 0;
         return ['data' => $suratList, 'total' => $total];
     }
+
+        /**
+         * Hitung jumlah surat AKTIF (inbox) yang belum dibaca oleh user tertentu.
+         * "Belum dibaca" diartikan sebagai tidak adanya baris pada surat_read untuk (surat_id,user_id).
+         */
+        public function getUnreadCountForUser(int $userId): int
+        {
+                $sql = "
+                        SELECT COUNT(*) AS cnt
+                        FROM surat_penerima sp
+                        JOIN surat s ON s.id = sp.surat_id
+                        WHERE sp.user_id = ?
+                            AND sp.tipe_penerima = 'AKTIF'
+                            AND NOT EXISTS (
+                                SELECT 1 FROM surat_read sr
+                                WHERE sr.surat_id = s.id AND sr.user_id = ?
+                            )
+                ";
+                $row = Database::fetchOne($sql, [$userId, $userId]);
+                return (int)($row['cnt'] ?? 0);
+        }
 
     /**
      * BARU: Fungsi untuk mengambil detail satu surat berdasarkan ID.

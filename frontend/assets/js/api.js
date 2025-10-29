@@ -63,6 +63,10 @@ const API = {
         return this.post('/read.php', { surat_id: Number(id) });
     },
     
+    async getUnreadCount() {
+        return this.get('/surat.php', { unread_count: 1 });
+    },
+    
     // ... (method lain bisa ditambahkan nanti)
 };
 

@@ -19,7 +19,7 @@ const Components = {
                         <div class="email-from">${Utils.escapeHtml(
                           surat.pengirim_nama
                         )}</div>
-                        <div class="email-date">${Utils.formatDate(
+                        <div class="email-date">${Utils.formatDateTimeLabel(
                           surat.tanggal_surat
                         )}</div>
                     </div>
@@ -125,7 +125,7 @@ const Components = {
                             )}</p>
                         </div>
                     </div>
-                    <div class="email-detail-date">${Utils.formatDate(
+                    <div class="email-detail-date">${Utils.formatDateTimeLabel(
                       surat.tanggal_surat
                     )}</div>
                 </div>
@@ -186,7 +186,7 @@ const Components = {
             .map(
               (d) => `
             <li><strong>${Utils.escapeHtml(d.user_nama || "Pengguna")}</strong>
-              (${Utils.formatDate(d.created_at)})<br/>${Utils.escapeHtml(
+              (${Utils.formatDateTimeLabel(d.created_at)})<br/>${Utils.escapeHtml(
                 d.disposition_text || ""
               )}
             </li>`
@@ -206,10 +206,10 @@ const Components = {
               const cls = done ? "target-chip--done" : "target-chip--pending";
               const tip = done
                 ? t.ditindak_at
-                  ? `Ditindak: ${Utils.formatDate(t.ditindak_at)}`
+                  ? `Ditindak: ${Utils.formatDateTimeLabel(t.ditindak_at)}`
                   : "Ditindak"
                 : t.diterima_at
-                ? `Diterima: ${Utils.formatDate(t.diterima_at)}`
+                ? `Diterima: ${Utils.formatDateTimeLabel(t.diterima_at)}`
                 : "Menunggu";
               const label = done ? "Selesai" : "Menunggu";
               return `<li><span class=\"target-chip ${cls}\" title=\"${Utils.escapeHtml(
@@ -233,9 +233,9 @@ const Components = {
             <li><strong>${Utils.escapeHtml(
               r.user_nama || ""
             )}</strong> - ${Utils.escapeHtml(r.tipe_penerima || "")}
-              (diterima: ${Utils.formatDate(r.diterima_at)}${
+              (diterima: ${Utils.formatDateTimeLabel(r.diterima_at)}${
                 r.ditindak_at
-                  ? ", ditindak: " + Utils.formatDate(r.ditindak_at)
+                  ? ", ditindak: " + Utils.formatDateTimeLabel(r.ditindak_at)
                   : ""
               })
             </li>`

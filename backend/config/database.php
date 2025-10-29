@@ -21,6 +21,13 @@ class Database
             mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
             $this->connection = new mysqli(self::HOST, self::USER, self::PASS, self::NAME, self::PORT);
             $this->connection->set_charset(self::CHARSET);
+            // Set MySQL session time zone to WITA (GMT+8) for NOW(), CURDATE(), etc.
+            try {
+                $this->connection->query("SET time_zone = '+08:00'");
+            } catch (\mysqli_sql_exception $e) {
+                // Ignore if not permitted; fallback to server default
+                error_log("Warning: failed to set MySQL time_zone +08:00: " . $e->getMessage());
+            }
         } catch (mysqli_sql_exception $e) {
             error_log("Database connection failed: " . $e->getMessage());
             throw new Exception("Tidak dapat terhubung ke database.");

@@ -10,7 +10,7 @@ ini_set('display_errors', 0); // JANGAN tampilkan error ke browser
 ini_set('log_errors', 1); // TAPI, catat error ke log file
 ini_set('error_log', __DIR__ . '/../logs/php_errors.log'); // Tentukan lokasi log
 
-date_default_timezone_set('Asia/Jakarta');
+date_default_timezone_set('Asia/Makassar');
 
 // Utility functions
 function jsonResponse(array $data, int $statusCode = 200): void

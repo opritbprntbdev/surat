@@ -61,42 +61,128 @@ const Utils = {
         }
     },
 
-    // Date utilities
+    // Date utilities (Indonesia, WITA/GMT+8 Makassar)
     formatDate(dateString) {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffMs = now - date;
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        if (!dateString) return '';
+        const LOCALE = 'id-ID';
+        const TZ = 'Asia/Makassar'; // WITA (GMT+8)
+
+        // Robust date parsing for MySQL formats ('YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS')
+        let date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+            // Try replace space with 'T' for better parsing
+            const isoLike = String(dateString).replace(' ', 'T');
+            date = new Date(isoLike);
+        }
+        if (isNaN(date.getTime())) return '';
+
+        // Helper: get Y-M-D string in target timezone
+        const ymdInTZ = (d) => {
+            const parts = new Intl.DateTimeFormat('en-CA', {
+                timeZone: TZ,
+                year: 'numeric', month: '2-digit', day: '2-digit'
+            }).formatToParts(d);
+            const map = Object.fromEntries(parts.map(p => [p.type, p.value]));
+            return `${map.year}-${map.month}-${map.day}`; // YYYY-MM-DD
+        };
+        const todayYMD = ymdInTZ(new Date());
+        const dateYMD = ymdInTZ(date);
+
+        // Convert YMD (in TZ) to a UTC date for safe day-diff calc
+        const ymdToUTCDate = (ymd) => {
+            const [y, m, d] = ymd.split('-').map(Number);
+            return new Date(Date.UTC(y, m - 1, d));
+        };
+        const diffDays = Math.floor((ymdToUTCDate(todayYMD) - ymdToUTCDate(dateYMD)) / 86400000);
+
+        // Today: show time HH:mm (24h)
+        if (diffDays === 0) {
+            return new Intl.DateTimeFormat(LOCALE, {
+                timeZone: TZ,
+                hour: '2-digit', minute: '2-digit', hour12: false
+            }).format(date);
+        }
+        // Yesterday
+        if (diffDays === 1) {
+            return 'Kemarin';
+        }
+        // Same week (within last 7 days): show weekday in Indonesian
+        if (diffDays > 1 && diffDays < 7) {
+            return new Intl.DateTimeFormat(LOCALE, {
+                timeZone: TZ,
+                weekday: 'long'
+            }).format(date);
+        }
+
+        // Same year: d MMM (e.g., 29 Okt)
+        const nowYear = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric' }).format(new Date());
+        const dateYear = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric' }).format(date);
+        if (nowYear === dateYear) {
+            return new Intl.DateTimeFormat(LOCALE, {
+                timeZone: TZ,
+                day: 'numeric', month: 'short'
+            }).format(date);
+        }
+
+        // Older: d MMM yyyy
+        return new Intl.DateTimeFormat(LOCALE, {
+            timeZone: TZ,
+            day: 'numeric', month: 'short', year: 'numeric'
+        }).format(date);
+    },
+
+    // Full date-time label with Indonesian weekday and exact time (WITA)
+    // e.g., "Rabu, 29 Okt 2025 14.35" or "Kemarin, 28 Okt 2025 09.10" or "Hari ini, 08.25"
+    formatDateTimeLabel(dateString) {
+        if (!dateString) return '';
+        const LOCALE = 'id-ID';
+        const TZ = 'Asia/Makassar';
+
+        let date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+            const isoLike = String(dateString).replace(' ', 'T');
+            date = new Date(isoLike);
+        }
+        if (isNaN(date.getTime())) return '';
+
+        // Day diff in target timezone
+        const ymdInTZ = (d) => {
+            const parts = new Intl.DateTimeFormat('en-CA', {
+                timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit'
+            }).formatToParts(d);
+            const map = Object.fromEntries(parts.map(p => [p.type, p.value]));
+            return `${map.year}-${map.month}-${map.day}`;
+        };
+        const todayYMD = ymdInTZ(new Date());
+        const dateYMD = ymdInTZ(date);
+        const ymdToUTCDate = (ymd) => {
+            const [y, m, d] = ymd.split('-').map(Number);
+            return new Date(Date.UTC(y, m - 1, d));
+        };
+        const diffDays = Math.floor((ymdToUTCDate(todayYMD) - ymdToUTCDate(dateYMD)) / 86400000);
+
+        const fullDate = new Intl.DateTimeFormat(LOCALE, {
+            timeZone: TZ, weekday: 'long', day: 'numeric', month: 'short', year: 'numeric'
+        }).format(date);
+        const time = new Intl.DateTimeFormat(LOCALE, {
+            timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false
+        }).format(date).replace(':', '.'); // Use dot separator style (HH.mm)
 
         if (diffDays === 0) {
-            // Today - show time
-            return date.toLocaleTimeString('en-US', { 
-                hour: '2-digit', 
-                minute: '2-digit',
-                hour12: true 
-            });
-        } else if (diffDays === 1) {
-            // Yesterday
-            return 'Yesterday';
-        } else if (diffDays < 7) {
-            // This week
-            return date.toLocaleDateString('en-US', { 
-                weekday: 'short' 
-            });
-        } else if (diffDays < 365) {
-            // This year
-            return date.toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric' 
-            });
-        } else {
-            // Older
-            return date.toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric', 
-                year: 'numeric' 
-            });
+            // Today: "Hari ini, HH.mm" or include date if preferred
+            return `Hari ini, ${time}`;
         }
+        if (diffDays === 1) {
+            // Yesterday: "Kemarin, d MMM yyyy HH.mm"
+            // Reformat date without weekday for brevity
+            const dateNoWeek = new Intl.DateTimeFormat(LOCALE, {
+                timeZone: TZ, day: 'numeric', month: 'short', year: 'numeric'
+            }).format(date);
+            return `Kemarin, ${dateNoWeek} ${time}`;
+        }
+
+        // Default: "Rabu, 29 Okt 2025 14.35"
+        return `${fullDate} ${time}`;
     },
 
     // Email utilities

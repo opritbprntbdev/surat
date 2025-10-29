@@ -6,11 +6,24 @@ const App = {
     filterFacet: "ALL", // ALL, CABANG, DIREKSI, DIVISI, PIMSUBDIV
     filterRead: "ALL", // ALL, READ, UNREAD, STARRED, UNSTARRED
     searchQuery: "", // free text filter for inbox
+    page: 1,
+    pageSize: 50,
+    total: 0,
   },
 
   init() {
+    // Apply persisted page size preference
+    const savedSize = parseInt(
+      localStorage.getItem("SURAT_PAGE_SIZE") || "",
+      10
+    );
+    if (!isNaN(savedSize) && [20, 50, 100].includes(savedSize)) {
+      this.state.pageSize = savedSize;
+    }
     this.bindEvents();
     this.loadSurat();
+    // Refresh sidebar unread badge on load
+    this.refreshUnreadBadge();
   },
 
   bindEvents() {
@@ -61,8 +74,9 @@ const App = {
           facetTabs.forEach((b) =>
             b.classList.toggle("active", b === e.currentTarget)
           );
-          // Re-render with client-side filter
-          this.renderSuratList();
+          // Reload with server-side filter
+          this.state.page = 1;
+          this.loadSurat();
         });
       });
     }
@@ -72,20 +86,43 @@ const App = {
     if (readSel) {
       readSel.addEventListener("change", (e) => {
         this.state.filterRead = (e.target.value || "ALL").toUpperCase();
-        this.renderSuratList();
+        this.state.page = 1;
+        this.loadSurat();
       });
     }
 
-    // Search input (debounced) – apply client-side filter on every page keystroke
+    // Search input (debounced) – now call server-side search
     const searchInput = Utils.$("#search-input");
     if (searchInput) {
       const apply = Utils.debounce(() => {
         this.state.searchQuery = (searchInput.value || "").trim();
-        this.renderSuratList();
+        this.state.page = 1;
+        this.loadSurat();
       }, 200);
       ["input", "keyup", "change"].forEach((evt) =>
         searchInput.addEventListener(evt, apply)
       );
+    }
+  },
+
+  async refreshUnreadBadge() {
+    try {
+      const el = document.getElementById("inbox-unread-count");
+      if (!el) return;
+      const res = await API.getUnreadCount();
+      const n =
+        res && res.data && typeof res.data.unread !== "undefined"
+          ? Number(res.data.unread)
+          : 0;
+      if (n > 0) {
+        el.textContent = String(n);
+        el.style.display = "inline-block";
+      } else {
+        el.textContent = "0";
+        el.style.display = "none";
+      }
+    } catch (e) {
+      // non-blocking
     }
   },
 
@@ -94,11 +131,19 @@ const App = {
     if (!emailList) return;
     emailList.innerHTML = Components.createLoadingState("Memuat surat...");
     try {
-      const params = {};
+      const params = {
+        page: this.state.page,
+        page_size: this.state.pageSize,
+        facet: this.state.filterFacet,
+        read: this.state.filterRead,
+        q: this.state.searchQuery,
+      };
       if (this.state.filterMyUnanswered) params.my_unanswered = 1;
       const response = await API.getSuratList(params);
       this.state.suratList = response.data.data;
+      this.state.total = Number(response.data.total || 0);
       this.renderSuratList();
+      this.updatePager();
     } catch (error) {
       emailList.innerHTML = Components.createErrorState(
         "Gagal Memuat Surat",
@@ -108,56 +153,78 @@ const App = {
     }
   },
 
+  updatePager() {
+    const pager = document.getElementById("pager");
+    if (!pager) return;
+    const total = this.state.total || 0;
+    const page = this.state.page || 1;
+    const size = this.state.pageSize || 50;
+    const pages = Math.max(1, Math.ceil(total / size));
+
+    if (total === 0) {
+      pager.innerHTML = "";
+      return;
+    }
+    const start = (page - 1) * size + 1;
+    const end = Math.min(total, page * size);
+    pager.innerHTML = `
+      <button class="btn" id="pager-prev" ${
+        page <= 1 ? "disabled" : ""
+      }>&laquo; Prev</button>
+      <button class="btn" id="pager-next" ${
+        page >= pages ? "disabled" : ""
+      }>Next &raquo;</button>
+      <span class="info">Halaman ${page} dari ${pages} • Menampilkan ${start}-${end} dari ${total}</span>
+      <label style="margin-left:auto; font-size:12px; color:#5f6368;">Items per page:
+        <select id="page-size-select" class="page-size">
+          <option value="20">20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </label>
+    `;
+    const prev = document.getElementById("pager-prev");
+    const next = document.getElementById("pager-next");
+    if (prev)
+      prev.onclick = () => {
+        if (this.state.page > 1) {
+          this.state.page -= 1;
+          this.loadSurat();
+        }
+      };
+    if (next)
+      next.onclick = () => {
+        if (this.state.page < pages) {
+          this.state.page += 1;
+          this.loadSurat();
+        }
+      };
+
+    // Page size selector wiring with persistence
+    const sel = document.getElementById("page-size-select");
+    if (sel) {
+      sel.value = String(size);
+      sel.onchange = () => {
+        const v = parseInt(sel.value, 10);
+        if (!isNaN(v)) {
+          localStorage.setItem("SURAT_PAGE_SIZE", String(v));
+          this.state.pageSize = v;
+          this.state.page = 1;
+          this.loadSurat();
+        }
+      };
+    }
+  },
+
   renderSuratList() {
     const emailList = Utils.$("#email-list");
     if (!emailList) return;
-    // Apply client-side filters
+    // Server already applied filters; just render what we have
     let suratToRender = Array.isArray(this.state.suratList)
       ? [...this.state.suratList]
       : [];
 
-    // Facet by pengirim_role
-    const facet = (this.state.filterFacet || "ALL").toUpperCase();
-    if (facet !== "ALL") {
-      const fNorm = facet.replace(/[^A-Z]/g, "");
-      suratToRender = suratToRender.filter((s) => {
-        const roleNorm = String(s.pengirim_role || "")
-          .toUpperCase()
-          .replace(/[^A-Z]/g, "");
-        return roleNorm === fNorm;
-      });
-    }
-
-    // Read/starred filter
-    const r = (this.state.filterRead || "ALL").toUpperCase();
-    if (r !== "ALL") {
-      suratToRender = suratToRender.filter((s) => {
-        const starred = !!s.starred;
-        const read = !!s.is_read;
-        if (r === "STARRED") return starred;
-        if (r === "UNSTARRED") return !starred;
-        if (r === "READ") return read;
-        if (r === "UNREAD") return !read;
-        return true;
-      });
-    }
-
-    // Text search filter (client-side)
-    const q = (this.state.searchQuery || "").toLowerCase();
-    if (q) {
-      const hit = (v) =>
-        String(v || "")
-          .toLowerCase()
-          .includes(q);
-      suratToRender = suratToRender.filter(
-        (s) =>
-          hit(s.perihal) ||
-          hit(s.pengirim_nama) ||
-          hit(s.nomor_surat) ||
-          hit(s.status) ||
-          hit(s.last_dispo_text)
-      );
-    }
+    // Text search now handled server-side; keep client-side as safety disabled
 
     if (!suratToRender || suratToRender.length === 0) {
       emailList.innerHTML = Components.createEmptyState(
@@ -312,6 +379,8 @@ const App = {
         if (found) found.is_read = true;
         const sel = Utils.$(".email-item.selected");
         if (sel) sel.classList.remove("unread");
+        // update sidebar badge after marking read
+        this.refreshUnreadBadge();
       } catch (err) {
         /* non-blocking */
       }
@@ -493,11 +562,17 @@ const App = {
       selected.forEach((label, id) => {
         const chip = document.createElement("span");
         chip.className = "chip";
-        chip.innerHTML = `${"${"}label${"}"} <span class="remove" title="Hapus">&times;</span>`;
-        chip.querySelector(".remove").addEventListener("click", () => {
+        // Safer text insertion to avoid accidental HTML injection
+        chip.textContent = label + " ";
+        const rm = document.createElement("span");
+        rm.className = "remove";
+        rm.title = "Hapus";
+        rm.innerHTML = "&times;";
+        rm.addEventListener("click", () => {
           selected.delete(id);
           renderChips();
         });
+        chip.appendChild(rm);
         chips.appendChild(chip);
       });
     }

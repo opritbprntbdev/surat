@@ -39,6 +39,7 @@ $isUmum = strtoupper($role) === 'UMUM';
                     </path>
                 </svg>
                 <span>Kotak Masuk</span>
+                <span class="count" id="inbox-unread-count" style="display:none">0</span>
             </a>
 
             <!-- Surat Terkirim -->
@@ -74,12 +75,21 @@ $isUmum = strtoupper($role) === 'UMUM';
             <!-- Arsip -->
             <a href="<?php echo $base_url; ?>pages/surat/archive.php"
                 class="nav-item <?php echo (strpos($current_path, '/pages/surat/archive.php') !== false) ? 'active' : ''; ?>">
-                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                    </path>
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <!-- Archive box icon (non-trash) -->
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7.5h18M5.25 7.5l.625 10A2.25 2.25 0 007.12 19.5h9.76a2.25 2.25 0 002.245-2.126l.625-10M9 12h6"/>
                 </svg>
                 <span>Arsip</span>
+            </a>
+
+            <!-- Tracking (semua role) -->
+            <a href="<?php echo $base_url; ?>pages/surat/tracking.php"
+                class="nav-item <?php echo (strpos($current_path, '/pages/surat/tracking.php') !== false) ? 'active' : ''; ?>">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <!-- Route/track icon -->
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20.25c0-1.243 1.007-2.25 2.25-2.25h1.5A3.75 3.75 0 0016.5 14.25V9.75M7.5 6.75h9M7.5 6.75A1.5 1.5 0 119 5.25a1.5 1.5 0 01-1.5 1.5zM16.5 9.75A1.5 1.5 0 1118 8.25a1.5 1.5 0 01-1.5 1.5z"/>
+                </svg>
+                <span>Tracking</span>
             </a>
 
             <!-- User Management - PERBAIKAN DI SINI -->
