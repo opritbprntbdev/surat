@@ -3,6 +3,9 @@ const App = {
     suratList: [],
     currentSuratId: null,
     filterMyUnanswered: false,
+    filterFacet: "ALL", // ALL, CABANG, DIREKSI, DIVISI, PIMSUBDIV
+    filterRead: "ALL", // ALL, READ, UNREAD, STARRED, UNSTARRED
+    searchQuery: "", // free text filter for inbox
   },
 
   init() {
@@ -14,6 +17,15 @@ const App = {
     const emailList = Utils.$("#email-list");
     if (emailList) {
       emailList.addEventListener("click", (e) => {
+        // Toggle star without opening detail
+        const starBtn = e.target.closest && e.target.closest(".email-star");
+        if (starBtn) {
+          e.stopPropagation();
+          const suratId = Number(starBtn.dataset.suratId);
+          const isStarred = starBtn.classList.contains("starred");
+          App.toggleStar(suratId, !isStarred, starBtn);
+          return;
+        }
         const item = e.target.closest(".email-item");
         if (item && item.dataset.suratId) {
           this.selectSurat(item.dataset.suratId);
@@ -26,14 +38,54 @@ const App = {
       refreshBtn.addEventListener("click", () => this.loadSurat());
     }
 
-    const filterBtn = Utils.$('#filter-unanswered-btn');
+    const filterBtn = Utils.$("#filter-unanswered-btn");
     if (filterBtn) {
-      filterBtn.addEventListener('click', () => {
+      filterBtn.addEventListener("click", () => {
         this.state.filterMyUnanswered = !this.state.filterMyUnanswered;
-        filterBtn.classList.toggle('active', this.state.filterMyUnanswered);
-        filterBtn.title = this.state.filterMyUnanswered ? 'Menampilkan surat yang belum Anda jawab' : 'Tampilkan yang belum dijawab';
+        filterBtn.classList.toggle("active", this.state.filterMyUnanswered);
+        filterBtn.title = this.state.filterMyUnanswered
+          ? "Menampilkan surat yang belum Anda jawab"
+          : "Tampilkan yang belum dijawab";
         this.loadSurat();
       });
+    }
+
+    // Quick filter tabs (facet)
+    const facetTabs = Utils.$$("#quick-filters .tab");
+    if (facetTabs && facetTabs.length) {
+      facetTabs.forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          const val = (e.currentTarget.dataset.facet || "ALL").toUpperCase();
+          this.state.filterFacet = val;
+          // toggle active class
+          facetTabs.forEach((b) =>
+            b.classList.toggle("active", b === e.currentTarget)
+          );
+          // Re-render with client-side filter
+          this.renderSuratList();
+        });
+      });
+    }
+
+    // Read/star filter
+    const readSel = Utils.$("#read-filter-select");
+    if (readSel) {
+      readSel.addEventListener("change", (e) => {
+        this.state.filterRead = (e.target.value || "ALL").toUpperCase();
+        this.renderSuratList();
+      });
+    }
+
+    // Search input (debounced) – apply client-side filter on every page keystroke
+    const searchInput = Utils.$("#search-input");
+    if (searchInput) {
+      const apply = Utils.debounce(() => {
+        this.state.searchQuery = (searchInput.value || "").trim();
+        this.renderSuratList();
+      }, 200);
+      ["input", "keyup", "change"].forEach((evt) =>
+        searchInput.addEventListener(evt, apply)
+      );
     }
   },
 
@@ -59,7 +111,53 @@ const App = {
   renderSuratList() {
     const emailList = Utils.$("#email-list");
     if (!emailList) return;
-    const suratToRender = this.state.suratList;
+    // Apply client-side filters
+    let suratToRender = Array.isArray(this.state.suratList)
+      ? [...this.state.suratList]
+      : [];
+
+    // Facet by pengirim_role
+    const facet = (this.state.filterFacet || "ALL").toUpperCase();
+    if (facet !== "ALL") {
+      const fNorm = facet.replace(/[^A-Z]/g, "");
+      suratToRender = suratToRender.filter((s) => {
+        const roleNorm = String(s.pengirim_role || "")
+          .toUpperCase()
+          .replace(/[^A-Z]/g, "");
+        return roleNorm === fNorm;
+      });
+    }
+
+    // Read/starred filter
+    const r = (this.state.filterRead || "ALL").toUpperCase();
+    if (r !== "ALL") {
+      suratToRender = suratToRender.filter((s) => {
+        const starred = !!s.starred;
+        const read = !!s.is_read;
+        if (r === "STARRED") return starred;
+        if (r === "UNSTARRED") return !starred;
+        if (r === "READ") return read;
+        if (r === "UNREAD") return !read;
+        return true;
+      });
+    }
+
+    // Text search filter (client-side)
+    const q = (this.state.searchQuery || "").toLowerCase();
+    if (q) {
+      const hit = (v) =>
+        String(v || "")
+          .toLowerCase()
+          .includes(q);
+      suratToRender = suratToRender.filter(
+        (s) =>
+          hit(s.perihal) ||
+          hit(s.pengirim_nama) ||
+          hit(s.nomor_surat) ||
+          hit(s.status) ||
+          hit(s.last_dispo_text)
+      );
+    }
 
     if (!suratToRender || suratToRender.length === 0) {
       emailList.innerHTML = Components.createEmptyState(
@@ -128,27 +226,37 @@ const App = {
       }
 
       // Jika penerima aktif bukan UMUM, wire submit disposisi
-      const btnSubmitDisp = content.querySelector('#btn-submit-disp');
+      const btnSubmitDisp = content.querySelector("#btn-submit-disp");
       if (btnSubmitDisp) {
-        btnSubmitDisp.addEventListener('click', async ()=>{
-          const textEl = content.querySelector('#disp-text');
-          const text = (textEl && textEl.value ? textEl.value.trim() : '');
-          if (!text) { alert('Teks disposisi wajib diisi'); return; }
-          try{
-            const base = (window.API_BASE || '/surat/backend/api').replace(/\/$/, '');
+        btnSubmitDisp.addEventListener("click", async () => {
+          const textEl = content.querySelector("#disp-text");
+          const text = textEl && textEl.value ? textEl.value.trim() : "";
+          if (!text) {
+            alert("Teks disposisi wajib diisi");
+            return;
+          }
+          try {
+            const base = (window.API_BASE || "/surat/backend/api").replace(
+              /\/$/,
+              ""
+            );
             const resp = await fetch(`${base}/disposisi.php?action=submit`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'same-origin',
-              body: JSON.stringify({ surat_id: suratData.id, text })
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "same-origin",
+              body: JSON.stringify({ surat_id: suratData.id, text }),
             });
             const json = await resp.json();
-            if (!resp.ok || json.success === false) throw new Error(json.error || json.message || 'Gagal');
+            if (!resp.ok || json.success === false)
+              throw new Error(json.error || json.message || "Gagal");
             // After submitting, reload list
             App.loadSurat();
-            detailPane.innerHTML = Components.createEmptyState('Berhasil', 'Disposisi tersimpan dan surat dikembalikan ke UMUM.');
-          }catch(err){
-            alert(err.message || 'Gagal menyimpan disposisi');
+            detailPane.innerHTML = Components.createEmptyState(
+              "Berhasil",
+              "Disposisi tersimpan dan surat dikembalikan ke UMUM."
+            );
+          } catch (err) {
+            alert(err.message || "Gagal menyimpan disposisi");
           }
         });
       }
@@ -158,7 +266,10 @@ const App = {
       if (pdfBtn) {
         pdfBtn.addEventListener("click", (e) => {
           const id = e.currentTarget.dataset.suratId;
-          const base = (window.API_BASE || '/surat/backend/api').replace(/\/$/, '');
+          const base = (window.API_BASE || "/surat/backend/api").replace(
+            /\/$/,
+            ""
+          );
           window.open(`${base}/pdf.php?id=${id}`, "_blank");
         });
       }
@@ -190,12 +301,40 @@ const App = {
           applyZoom();
         }, 50);
       }
+
+      // Mark as read (persist) and update list item UI
+      try {
+        await API.markRead(suratId);
+        // Update state and DOM class
+        const found = this.state.suratList.find(
+          (s) => String(s.id) === String(suratId)
+        );
+        if (found) found.is_read = true;
+        const sel = Utils.$(".email-item.selected");
+        if (sel) sel.classList.remove("unread");
+      } catch (err) {
+        /* non-blocking */
+      }
     } catch (error) {
       detailPane.innerHTML = Components.createErrorState(
         "Gagal Memuat Detail",
         error.message,
         () => this.selectSurat(suratId)
       );
+    }
+  },
+
+  async toggleStar(suratId, value, btnEl) {
+    try {
+      await API.toggleStar(suratId, value);
+      // Update UI instantly
+      if (btnEl) btnEl.classList.toggle("starred", value);
+      const found = this.state.suratList.find(
+        (s) => Number(s.id) === Number(suratId)
+      );
+      if (found) found.starred = !!value;
+    } catch (err) {
+      Utils.showToast(err.message || "Gagal memperbarui bintang", "error");
     }
   },
 
@@ -242,16 +381,16 @@ const App = {
     });
     modal.querySelector("#disp-cancel").addEventListener("click", close);
 
-  // Typeahead users (custom UI) + multi chips
-  const input = modal.querySelector("#disp-to");
-  const addBtn = modal.querySelector('#disp-add');
-  const chips = modal.querySelector('#disp-chips');
-  const panel = modal.querySelector("#disp-panel");
+    // Typeahead users (custom UI) + multi chips
+    const input = modal.querySelector("#disp-to");
+    const addBtn = modal.querySelector("#disp-add");
+    const chips = modal.querySelector("#disp-chips");
+    const panel = modal.querySelector("#disp-panel");
     let lastQ = "";
     let t = null;
     let items = [];
     let activeIndex = -1;
-  const selected = new Map(); // id -> label
+    const selected = new Map(); // id -> label
 
     input.addEventListener("focus", () => triggerFetch(""));
     input.addEventListener("input", () => {
@@ -282,47 +421,65 @@ const App = {
       if (!panel.contains(e.target) && e.target !== input) hidePanel();
     });
 
-    function triggerFetch(q){
+    function triggerFetch(q) {
       if (q === lastQ) return;
       lastQ = q;
       if (t) clearTimeout(t);
       t = setTimeout(async () => {
         try {
-          const base = (window.API_BASE || '/surat/backend/api').replace(/\/$/, '');
-          const res = await fetch(`${base}/recipients.php?q=` + encodeURIComponent(q), { credentials: "same-origin" });
+          const base = (window.API_BASE || "/surat/backend/api").replace(
+            /\/$/,
+            ""
+          );
+          const res = await fetch(
+            `${base}/recipients.php?q=` + encodeURIComponent(q),
+            { credentials: "same-origin" }
+          );
           const json = await res.json();
-          items = (json.data || []).filter(x=>x.type==='USER');
+          items = (json.data || []).filter((x) => x.type === "USER");
           activeIndex = items.length ? 0 : -1;
           renderPanel();
-        } catch { items = []; renderPanel(); }
+        } catch {
+          items = [];
+          renderPanel();
+        }
       }, 150);
     }
-    function renderPanel(){
-      panel.innerHTML = '';
-      if (!items.length) { hidePanel(); return; }
+    function renderPanel() {
+      panel.innerHTML = "";
+      if (!items.length) {
+        hidePanel();
+        return;
+      }
       const rect = input.getBoundingClientRect();
-      panel.style.width = input.offsetWidth + 'px';
-      panel.classList.remove('hidden');
-      items.forEach((x, idx)=>{
-        const div = document.createElement('div');
-        div.className = 'typeahead-item' + (idx===activeIndex ? ' active' : '');
+      panel.style.width = input.offsetWidth + "px";
+      panel.classList.remove("hidden");
+      items.forEach((x, idx) => {
+        const div = document.createElement("div");
+        div.className =
+          "typeahead-item" + (idx === activeIndex ? " active" : "");
         div.textContent = x.label;
-        div.addEventListener('mousedown', (e)=>{ e.preventDefault(); pick(x); });
+        div.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          pick(x);
+        });
         panel.appendChild(div);
       });
     }
-    function pick(x){
+    function pick(x) {
       if (!selected.has(x.id)) {
         selected.set(x.id, x.label);
         renderChips();
       }
-      input.value = '';
+      input.value = "";
       hidePanel();
     }
-    function hidePanel(){ panel.classList.add('hidden'); }
+    function hidePanel() {
+      panel.classList.add("hidden");
+    }
 
     if (addBtn) {
-      addBtn.addEventListener('click', () => {
+      addBtn.addEventListener("click", () => {
         if (activeIndex >= 0 && items[activeIndex]) {
           pick(items[activeIndex]);
           return;
@@ -331,28 +488,41 @@ const App = {
       });
     }
 
-    function renderChips(){
-      chips.innerHTML = '';
+    function renderChips() {
+      chips.innerHTML = "";
       selected.forEach((label, id) => {
-        const chip = document.createElement('span');
-        chip.className = 'chip';
-        chip.innerHTML = `${'${'}label${'}'} <span class="remove" title="Hapus">&times;</span>`;
-        chip.querySelector('.remove').addEventListener('click', ()=>{ selected.delete(id); renderChips(); });
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.innerHTML = `${"${"}label${"}"} <span class="remove" title="Hapus">&times;</span>`;
+        chip.querySelector(".remove").addEventListener("click", () => {
+          selected.delete(id);
+          renderChips();
+        });
         chips.appendChild(chip);
       });
     }
 
     modal.querySelector("#disp-send").addEventListener("click", async () => {
       const ids = Array.from(selected.keys());
-      if (!ids.length) { alert('Tambahkan minimal satu penerima.'); return; }
+      if (!ids.length) {
+        alert("Tambahkan minimal satu penerima.");
+        return;
+      }
       const note = modal.querySelector("#disp-note").value.trim();
       try {
-        const base = (window.API_BASE || '/surat/backend/api').replace(/\/$/, '');
+        const base = (window.API_BASE || "/surat/backend/api").replace(
+          /\/$/,
+          ""
+        );
         const resp = await fetch(`${base}/disposisi.php?action=request`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "same-origin",
-          body: JSON.stringify({ surat_id: surat.id, target_user_ids: ids, note }),
+          body: JSON.stringify({
+            surat_id: surat.id,
+            target_user_ids: ids,
+            note,
+          }),
         });
         const json = await resp.json();
         if (!resp.ok || json.success === false)

@@ -51,13 +51,24 @@ $isUmum = strtoupper($role) === 'UMUM';
                 <span>Surat Terkirim</span>
             </a>
 
-            <!-- Disposisi Saya -->
-            <a href="<?php echo $base_url; ?>pages/surat/my_dispositions.php"
-                class="nav-item <?php echo (strpos($current_path, '/pages/surat/my_dispositions.php') !== false) ? 'active' : ''; ?>">
-                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            <!-- Disposisi Saya (sembunyikan untuk UMUM) -->
+            <?php if (!$isUmum): ?>
+                <a href="<?php echo $base_url; ?>pages/surat/my_dispositions.php"
+                    class="nav-item <?php echo (strpos($current_path, '/pages/surat/my_dispositions.php') !== false) ? 'active' : ''; ?>">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Disposisi Saya</span>
+                </a>
+            <?php endif; ?>
+
+            <!-- Berbintang -->
+            <a href="<?php echo $base_url; ?>pages/surat/starred.php"
+                class="nav-item <?php echo (strpos($current_path, '/pages/surat/starred.php') !== false) ? 'active' : ''; ?>">
+                <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
                 </svg>
-                <span>Disposisi Saya</span>
+                <span>Berbintang</span>
             </a>
 
             <!-- Arsip -->

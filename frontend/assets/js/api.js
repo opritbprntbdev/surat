@@ -55,6 +55,14 @@ const API = {
         return this.get(`/surat.php?id=${id}`);
     },
     
+    async toggleStar(id, starred) {
+        return this.post('/star.php', { surat_id: Number(id), starred: !!starred });
+    },
+    
+    async markRead(id) {
+        return this.post('/read.php', { surat_id: Number(id) });
+    },
+    
     // ... (method lain bisa ditambahkan nanti)
 };
 

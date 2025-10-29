@@ -15,9 +15,9 @@
                 <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
-                <input type="text" id="page-search-input" placeholder="Cari arsip..." class="search-input">
+                <input type="text" id="page-search-input" placeholder="Cari surat berbintang..." class="search-input">
             </div>
-            <h1 style="font-size:16px; font-weight:600;">Arsip</h1>
+            <h1 style="font-size:16px; font-weight:600;">Berbintang</h1>
         </div>
         <div class="header-right">
             <div class="user-menu-container">
@@ -56,7 +56,7 @@
 <?php require_once __DIR__ . '/../../layouts/footer.php'; ?>
 
 <script>
-// Loader untuk Arsip (surat_penerima tipe != AKTIF untuk user saat ini)
+// Loader for Starred box
 (function(){
     const emailList = document.getElementById('email-list');
     const detailPane = document.getElementById('email-detail');
@@ -91,18 +91,18 @@
         render(filtered);
     }
 
-    async function loadArchive(){
-        emailList.innerHTML = Components.createLoadingState('Memuat arsip...');
+    async function loadStarred(){
+        emailList.innerHTML = Components.createLoadingState('Memuat surat berbintang...');
         try{
-            const resp = await API.getSuratList({ box: 'archive' });
+            const resp = await API.getSuratList({ box: 'starred' });
             rows = resp.data?.data || [];
             if (!rows.length){
-                emailList.innerHTML = Components.createEmptyState('Arsip kosong', 'Belum ada surat di arsip.');
+                emailList.innerHTML = Components.createEmptyState('Tidak ada surat berbintang', 'Klik ikon bintang pada surat untuk menambahkannya ke daftar ini.');
                 return;
             }
             applyFilter();
         }catch(err){
-            emailList.innerHTML = Components.createErrorState('Gagal memuat', err.message, loadArchive);
+            emailList.innerHTML = Components.createErrorState('Gagal memuat', err.message, loadStarred);
         }
     }
 
@@ -111,6 +111,6 @@
         ['input','keyup','change'].forEach(evt => searchInput.addEventListener(evt, deb));
     }
 
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadArchive); else loadArchive();
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadStarred); else loadStarred();
 })();
 </script>

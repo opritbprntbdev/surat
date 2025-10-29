@@ -69,6 +69,7 @@ class SuratFunctions
         $role = $role ? strtoupper($role) : null;
         $box = $box ? strtolower($box) : null;
         $myUnanswered = !empty($opts['my_unanswered']);
+        $uid = (int) ($userId ?? 0);
 
         // Pastikan data lama telah memiliki routing dasar di surat_penerima
         $this->backfillSuratPenerima();
@@ -78,18 +79,40 @@ class SuratFunctions
             if ($box === 'sent') {
                 // Surat terkirim oleh user ini
                 $sql = "
-                    SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
-                           pengirim.nama_lengkap as pengirim_nama,
-                           (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id) AS dispo_count,
-                           (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id AND d.user_id = ?) AS my_dispo_count,
-                           (SELECT d.disposition_text FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_text,
-                           (SELECT d.created_at FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_created_at,
-                           (SELECT u.role FROM dispositions d JOIN user u ON u.id=d.user_id WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_user_role
-                    FROM surat s
-                    JOIN user pengirim ON s.pengirim_id = pengirim.id
-                    WHERE s.pengirim_id = ?
-                    ORDER BY s.tanggal_surat DESC
-                    LIMIT 50";
+                                  SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
+                                      pengirim.nama_lengkap as pengirim_nama,
+                                      UPPER(COALESCE(pengirim.role,'')) AS pengirim_role,
+                                                     (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id) AS dispo_count,
+                                                     (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id AND d.user_id = ?) AS my_dispo_count,
+                                                     (SELECT d.disposition_text FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_text,
+                                                     (SELECT d.created_at FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_created_at,
+                                                                     (SELECT u.role FROM dispositions d JOIN user u ON u.id=d.user_id WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_user_role,
+                                                     (
+                                                         SELECT COUNT(*) FROM surat_penerima sp2
+                                                         WHERE sp2.surat_id = s.id
+                                                             AND sp2.request_batch = (
+                                                                 SELECT sp3.request_batch FROM surat_penerima sp3
+                                                                 WHERE sp3.surat_id = s.id AND sp3.request_batch IS NOT NULL
+                                                                 ORDER BY sp3.diterima_at DESC LIMIT 1
+                                                             )
+                                                     ) AS progress_total,
+                                                     (
+                                                         SELECT COUNT(*) FROM surat_penerima sp2
+                                                         WHERE sp2.surat_id = s.id
+                                                             AND sp2.request_batch = (
+                                                                 SELECT sp3.request_batch FROM surat_penerima sp3
+                                                                 WHERE sp3.surat_id = s.id AND sp3.request_batch IS NOT NULL
+                                                                 ORDER BY sp3.diterima_at DESC LIMIT 1
+                                                             )
+                                                             AND sp2.tipe_penerima <> 'AKTIF'
+                                                                     ) AS progress_done,
+                                                                     EXISTS(SELECT 1 FROM surat_star ss WHERE ss.surat_id=s.id AND ss.user_id={$uid}) AS starred,
+                                                                     EXISTS(SELECT 1 FROM surat_read sr WHERE sr.surat_id=s.id AND sr.user_id={$uid}) AS is_read
+                                        FROM surat s
+                                        JOIN user pengirim ON s.pengirim_id = pengirim.id
+                                        WHERE s.pengirim_id = ?
+                                        ORDER BY s.tanggal_surat DESC
+                                        LIMIT 50";
                 $suratList = Database::fetchAll($sql, [$userId, $userId]);
                 $total = Database::fetchValue("SELECT COUNT(*) FROM surat WHERE pengirim_id = ?", [$userId]) ?? 0;
                 return ['data' => $suratList, 'total' => $total];
@@ -98,40 +121,127 @@ class SuratFunctions
             if ($box === 'archive') {
                 // Arsip untuk user ini (bukan aktif)
                 $sql = "
-                    SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
-                           pengirim.nama_lengkap as pengirim_nama,
-                           (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id) AS dispo_count,
-                           (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id AND d.user_id = ?) AS my_dispo_count,
-                           (SELECT d.disposition_text FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_text,
-                           (SELECT d.created_at FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_created_at,
-                           (SELECT u.role FROM dispositions d JOIN user u ON u.id=d.user_id WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_user_role
-                    FROM surat_penerima sp
-                    JOIN surat s ON s.id = sp.surat_id
-                    JOIN user pengirim ON s.pengirim_id = pengirim.id
-                    WHERE sp.user_id = ? AND sp.tipe_penerima <> 'AKTIF'
-                    ORDER BY sp.diterima_at DESC
-                    LIMIT 50";
+                                  SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
+                                      pengirim.nama_lengkap as pengirim_nama,
+                                      UPPER(COALESCE(pengirim.role,'')) AS pengirim_role,
+                                                     (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id) AS dispo_count,
+                                                     (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id AND d.user_id = ?) AS my_dispo_count,
+                                                     (SELECT d.disposition_text FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_text,
+                                                     (SELECT d.created_at FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_created_at,
+                                                                     (SELECT u.role FROM dispositions d JOIN user u ON u.id=d.user_id WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_user_role,
+                                                     (
+                                                         SELECT COUNT(*) FROM surat_penerima sp2
+                                                         WHERE sp2.surat_id = s.id
+                                                             AND sp2.request_batch = (
+                                                                 SELECT sp3.request_batch FROM surat_penerima sp3
+                                                                 WHERE sp3.surat_id = s.id AND sp3.request_batch IS NOT NULL
+                                                                 ORDER BY sp3.diterima_at DESC LIMIT 1
+                                                             )
+                                                     ) AS progress_total,
+                                                     (
+                                                         SELECT COUNT(*) FROM surat_penerima sp2
+                                                         WHERE sp2.surat_id = s.id
+                                                             AND sp2.request_batch = (
+                                                                 SELECT sp3.request_batch FROM surat_penerima sp3
+                                                                 WHERE sp3.surat_id = s.id AND sp3.request_batch IS NOT NULL
+                                                                 ORDER BY sp3.diterima_at DESC LIMIT 1
+                                                             )
+                                                             AND sp2.tipe_penerima <> 'AKTIF'
+                                                                     ) AS progress_done,
+                                                                     EXISTS(SELECT 1 FROM surat_star ss WHERE ss.surat_id=s.id AND ss.user_id={$uid}) AS starred,
+                                                                     EXISTS(SELECT 1 FROM surat_read sr WHERE sr.surat_id=s.id AND sr.user_id={$uid}) AS is_read
+                                        FROM surat_penerima sp
+                                        JOIN surat s ON s.id = sp.surat_id
+                                        JOIN user pengirim ON s.pengirim_id = pengirim.id
+                                        WHERE sp.user_id = ? AND sp.tipe_penerima <> 'AKTIF'
+                                        ORDER BY sp.diterima_at DESC
+                                        LIMIT 50";
                 $suratList = Database::fetchAll($sql, [$userId, $userId]);
                 $total = Database::fetchValue("SELECT COUNT(*) FROM surat_penerima WHERE user_id=? AND tipe_penerima<>'AKTIF'", [$userId]) ?? 0;
+                return ['data' => $suratList, 'total' => $total];
+            }
+
+            if ($box === 'starred') {
+                // Daftar surat berbintang untuk user ini (semua status/kotak)
+                $sql = "
+                                  SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
+                                      pengirim.nama_lengkap as pengirim_nama,
+                                      UPPER(COALESCE(pengirim.role,'')) AS pengirim_role,
+                                                     (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id) AS dispo_count,
+                                                     (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id AND d.user_id = ?) AS my_dispo_count,
+                                                     (SELECT d.disposition_text FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_text,
+                                                     (SELECT d.created_at FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_created_at,
+                                                     (SELECT u.role FROM dispositions d JOIN user u ON u.id=d.user_id WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_user_role,
+                                                     (
+                                                         SELECT COUNT(*) FROM surat_penerima sp2
+                                                         WHERE sp2.surat_id = s.id
+                                                             AND sp2.request_batch = (
+                                                                 SELECT sp3.request_batch FROM surat_penerima sp3
+                                                                 WHERE sp3.surat_id = s.id AND sp3.request_batch IS NOT NULL
+                                                                 ORDER BY sp3.diterima_at DESC LIMIT 1
+                                                             )
+                                                     ) AS progress_total,
+                                                     (
+                                                         SELECT COUNT(*) FROM surat_penerima sp2
+                                                         WHERE sp2.surat_id = s.id
+                                                             AND sp2.request_batch = (
+                                                                 SELECT sp3.request_batch FROM surat_penerima sp3
+                                                                 WHERE sp3.surat_id = s.id AND sp3.request_batch IS NOT NULL
+                                                                 ORDER BY sp3.diterima_at DESC LIMIT 1
+                                                             )
+                                                             AND sp2.tipe_penerima <> 'AKTIF'
+                                                     ) AS progress_done,
+                                                     1 AS starred,
+                                                     EXISTS(SELECT 1 FROM surat_read sr WHERE sr.surat_id=s.id AND sr.user_id={$uid}) AS is_read
+                                        FROM surat_star ss
+                                        JOIN surat s ON s.id = ss.surat_id
+                                        JOIN user pengirim ON s.pengirim_id = pengirim.id
+                                        WHERE ss.user_id = ?
+                                        ORDER BY s.tanggal_surat DESC
+                                        LIMIT 50";
+                $suratList = Database::fetchAll($sql, [$userId, $userId]);
+                $total = Database::fetchValue("SELECT COUNT(*) FROM surat_star WHERE user_id = ?", [$userId]) ?? 0;
                 return ['data' => $suratList, 'total' => $total];
             }
 
             if ($box === 'my_disposisi' || $box === 'my_dispo' || $box === 'my') {
                 // Daftar semua jawaban disposisi milik user ini
                 $sql = "
-                    SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
-                           pengirim.nama_lengkap as pengirim_nama,
-                           d.disposition_text AS last_dispo_text,
-                           d.created_at AS last_dispo_created_at,
-                           (SELECT COUNT(*) FROM dispositions d2 WHERE d2.surat_id = s.id) AS dispo_count,
-                           (SELECT COUNT(*) FROM dispositions d3 WHERE d3.surat_id = s.id AND d3.user_id = ?) AS my_dispo_count,
-                           (SELECT u.role FROM dispositions dd JOIN user u ON u.id=dd.user_id WHERE dd.surat_id = s.id ORDER BY dd.created_at DESC LIMIT 1) AS last_dispo_user_role
-                    FROM dispositions d
-                    JOIN surat s ON s.id = d.surat_id
-                    JOIN user pengirim ON s.pengirim_id = pengirim.id
-                    WHERE d.user_id = ?
-                    ORDER BY d.created_at DESC
-                    LIMIT 50";
+                                  SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
+                                      pengirim.nama_lengkap as pengirim_nama,
+                                      UPPER(COALESCE(pengirim.role,'')) AS pengirim_role,
+                                                     d.disposition_text AS last_dispo_text,
+                                                     d.created_at AS last_dispo_created_at,
+                                                     (SELECT COUNT(*) FROM dispositions d2 WHERE d2.surat_id = s.id) AS dispo_count,
+                                                     (SELECT COUNT(*) FROM dispositions d3 WHERE d3.surat_id = s.id AND d3.user_id = ?) AS my_dispo_count,
+                                                                     (SELECT u.role FROM dispositions dd JOIN user u ON u.id=dd.user_id WHERE dd.surat_id = s.id ORDER BY dd.created_at DESC LIMIT 1) AS last_dispo_user_role,
+                                                     (
+                                                         SELECT COUNT(*) FROM surat_penerima sp2
+                                                         WHERE sp2.surat_id = s.id
+                                                             AND sp2.request_batch = (
+                                                                 SELECT sp3.request_batch FROM surat_penerima sp3
+                                                                 WHERE sp3.surat_id = s.id AND sp3.request_batch IS NOT NULL
+                                                                 ORDER BY sp3.diterima_at DESC LIMIT 1
+                                                             )
+                                                     ) AS progress_total,
+                                                     (
+                                                         SELECT COUNT(*) FROM surat_penerima sp2
+                                                         WHERE sp2.surat_id = s.id
+                                                             AND sp2.request_batch = (
+                                                                 SELECT sp3.request_batch FROM surat_penerima sp3
+                                                                 WHERE sp3.surat_id = s.id AND sp3.request_batch IS NOT NULL
+                                                                 ORDER BY sp3.diterima_at DESC LIMIT 1
+                                                             )
+                                                             AND sp2.tipe_penerima <> 'AKTIF'
+                                                                     ) AS progress_done,
+                                                                     EXISTS(SELECT 1 FROM surat_star ss WHERE ss.surat_id=s.id AND ss.user_id={$uid}) AS starred,
+                                                                     EXISTS(SELECT 1 FROM surat_read sr WHERE sr.surat_id=s.id AND sr.user_id={$uid}) AS is_read
+                                        FROM dispositions d
+                                        JOIN surat s ON s.id = d.surat_id
+                                        JOIN user pengirim ON s.pengirim_id = pengirim.id
+                                        WHERE d.user_id = ?
+                                        ORDER BY d.created_at DESC
+                                        LIMIT 50";
                 $suratList = Database::fetchAll($sql, [$userId, $userId]);
                 $total = Database::fetchValue("SELECT COUNT(*) FROM dispositions WHERE user_id=?", [$userId]) ?? 0;
                 return ['data' => $suratList, 'total' => $total];
@@ -141,38 +251,82 @@ class SuratFunctions
             // Jika filter 'belum dijawab' diaktifkan, gunakan NOT EXISTS untuk menyaring
             if ($myUnanswered) {
                 $sql = "
-                SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
-                       pengirim.nama_lengkap as pengirim_nama,
-                       (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id) AS dispo_count,
-                       (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id AND d.user_id = ?) AS my_dispo_count,
-                       (SELECT d.disposition_text FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_text,
-                       (SELECT d.created_at FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_created_at,
-                       (SELECT u.role FROM dispositions d JOIN user u ON u.id=d.user_id WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_user_role
-                FROM surat_penerima sp
-                JOIN surat s ON s.id = sp.surat_id
-                JOIN user pengirim ON s.pengirim_id = pengirim.id
-                WHERE sp.user_id = ? AND sp.tipe_penerima = 'AKTIF'
-                  AND NOT EXISTS (
-                    SELECT 1 FROM dispositions d2 WHERE d2.surat_id = s.id AND d2.user_id = ?
-                  )
-                ORDER BY sp.diterima_at DESC
-                LIMIT 50";
+                          SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
+                              pengirim.nama_lengkap as pengirim_nama,
+                              UPPER(COALESCE(pengirim.role,'')) AS pengirim_role,
+                                             (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id) AS dispo_count,
+                                             (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id AND d.user_id = ?) AS my_dispo_count,
+                                             (SELECT d.disposition_text FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_text,
+                                             (SELECT d.created_at FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_created_at,
+                                             (SELECT u.role FROM dispositions d JOIN user u ON u.id=d.user_id WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_user_role,
+                                             (
+                                                 SELECT COUNT(*) FROM surat_penerima sp2
+                                                 WHERE sp2.surat_id = s.id
+                                                     AND sp2.request_batch = (
+                                                         SELECT sp3.request_batch FROM surat_penerima sp3
+                                                         WHERE sp3.surat_id = s.id AND sp3.request_batch IS NOT NULL
+                                                         ORDER BY sp3.diterima_at DESC LIMIT 1
+                                                     )
+                                             ) AS progress_total,
+                                             (
+                                                 SELECT COUNT(*) FROM surat_penerima sp2
+                                                 WHERE sp2.surat_id = s.id
+                                                     AND sp2.request_batch = (
+                                                         SELECT sp3.request_batch FROM surat_penerima sp3
+                                                         WHERE sp3.surat_id = s.id AND sp3.request_batch IS NOT NULL
+                                                         ORDER BY sp3.diterima_at DESC LIMIT 1
+                                                     )
+                                                     AND sp2.tipe_penerima <> 'AKTIF'
+                                            ) AS progress_done,
+                                            EXISTS(SELECT 1 FROM surat_star ss WHERE ss.surat_id=s.id AND ss.user_id={$uid}) AS starred,
+                                            EXISTS(SELECT 1 FROM surat_read sr WHERE sr.surat_id=s.id AND sr.user_id={$uid}) AS is_read
+                                FROM surat_penerima sp
+                                JOIN surat s ON s.id = sp.surat_id
+                                JOIN user pengirim ON s.pengirim_id = pengirim.id
+                                WHERE sp.user_id = ? AND sp.tipe_penerima = 'AKTIF'
+                                    AND NOT EXISTS (
+                                        SELECT 1 FROM dispositions d2 WHERE d2.surat_id = s.id AND d2.user_id = ?
+                                    )
+                                ORDER BY sp.diterima_at DESC
+                                LIMIT 50";
                 $suratList = Database::fetchAll($sql, [$userId, $userId, $userId]);
             } else {
                 $sql = "
-                SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
-                       pengirim.nama_lengkap as pengirim_nama,
-                       (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id) AS dispo_count,
-                       (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id AND d.user_id = ?) AS my_dispo_count,
-                       (SELECT d.disposition_text FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_text,
-                       (SELECT d.created_at FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_created_at,
-                       (SELECT u.role FROM dispositions d JOIN user u ON u.id=d.user_id WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_user_role
-                FROM surat_penerima sp
-                JOIN surat s ON s.id = sp.surat_id
-                JOIN user pengirim ON s.pengirim_id = pengirim.id
-                WHERE sp.user_id = ? AND sp.tipe_penerima = 'AKTIF'
-                ORDER BY sp.diterima_at DESC
-                LIMIT 50";
+                                SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
+                                             pengirim.nama_lengkap as pengirim_nama,
+                                             UPPER(COALESCE(pengirim.role,'')) AS pengirim_role,
+                                             (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id) AS dispo_count,
+                                             (SELECT COUNT(*) FROM dispositions d WHERE d.surat_id = s.id AND d.user_id = ?) AS my_dispo_count,
+                                             (SELECT d.disposition_text FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_text,
+                                             (SELECT d.created_at FROM dispositions d WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_created_at,
+                                                             (SELECT u.role FROM dispositions d JOIN user u ON u.id=d.user_id WHERE d.surat_id = s.id ORDER BY d.created_at DESC LIMIT 1) AS last_dispo_user_role,
+                                             (
+                                                 SELECT COUNT(*) FROM surat_penerima sp2
+                                                 WHERE sp2.surat_id = s.id
+                                                     AND sp2.request_batch = (
+                                                         SELECT sp3.request_batch FROM surat_penerima sp3
+                                                         WHERE sp3.surat_id = s.id AND sp3.request_batch IS NOT NULL
+                                                         ORDER BY sp3.diterima_at DESC LIMIT 1
+                                                     )
+                                             ) AS progress_total,
+                                             (
+                                                 SELECT COUNT(*) FROM surat_penerima sp2
+                                                 WHERE sp2.surat_id = s.id
+                                                     AND sp2.request_batch = (
+                                                         SELECT sp3.request_batch FROM surat_penerima sp3
+                                                         WHERE sp3.surat_id = s.id AND sp3.request_batch IS NOT NULL
+                                                         ORDER BY sp3.diterima_at DESC LIMIT 1
+                                                     )
+                                                     AND sp2.tipe_penerima <> 'AKTIF'
+                                                             ) AS progress_done,
+                                                             EXISTS(SELECT 1 FROM surat_star ss WHERE ss.surat_id=s.id AND ss.user_id={$uid}) AS starred,
+                                                             EXISTS(SELECT 1 FROM surat_read sr WHERE sr.surat_id=s.id AND sr.user_id={$uid}) AS is_read
+                                FROM surat_penerima sp
+                                JOIN surat s ON s.id = sp.surat_id
+                                JOIN user pengirim ON s.pengirim_id = pengirim.id
+                                WHERE sp.user_id = ? AND sp.tipe_penerima = 'AKTIF'
+                                ORDER BY sp.diterima_at DESC
+                                LIMIT 50";
                 $suratList = Database::fetchAll($sql, [$userId, $userId]);
             }
             $total = Database::fetchValue("SELECT COUNT(*) FROM surat_penerima WHERE user_id=? AND tipe_penerima='AKTIF'", [$userId]) ?? 0;
@@ -182,7 +336,8 @@ class SuratFunctions
         // Fallback umum bila userId tidak tersedia
         $sql = "
             SELECT s.id, s.nomor_surat, s.perihal, s.tanggal_surat, s.status,
-                   pengirim.nama_lengkap as pengirim_nama
+             pengirim.nama_lengkap as pengirim_nama,
+             UPPER(COALESCE(pengirim.role,'')) AS pengirim_role
             FROM surat s
             JOIN user pengirim ON s.pengirim_id = pengirim.id
             ORDER BY s.tanggal_surat DESC

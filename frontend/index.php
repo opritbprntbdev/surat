@@ -37,6 +37,25 @@
                 </svg>
                 <input type="text" id="search-input" placeholder="Cari surat..." class="search-input">
             </div>
+            <div class="quick-filters" id="quick-filters" aria-label="Filter cepat">
+                <div class="tabs" role="tablist">
+                    <button class="tab active" data-facet="ALL" role="tab" aria-selected="true">Semua</button>
+                    <button class="tab" data-facet="CABANG" role="tab" aria-selected="false">Cabang</button>
+                    <button class="tab" data-facet="DIREKSI" role="tab" aria-selected="false">Direksi</button>
+                    <button class="tab" data-facet="DIVISI" role="tab" aria-selected="false">Divisi</button>
+                    <button class="tab" data-facet="PIMSUBDIV" role="tab" aria-selected="false">Pimsubdiv</button>
+                </div>
+                <div class="read-filter">
+                    <label for="read-filter-select" class="sr-only">Filter baca</label>
+                    <select id="read-filter-select">
+                        <option value="ALL">Semua</option>
+                        <option value="STARRED">Berbintang</option>
+                        <option value="UNSTARRED">Tidak berbintang</option>
+                        <option value="UNREAD">Belum dibaca</option>
+                        <option value="READ">Dibaca</option>
+                    </select>
+                </div>
+            </div>
         </div>
         <div class="header-right">
             <!-- STRUKTUR DROPDOWN YANG BENAR -->

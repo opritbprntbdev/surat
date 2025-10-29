@@ -123,6 +123,44 @@
     text-overflow: ellipsis;
 }
 
+/* Progress label (X/Y) styles */
+.progress-label {
+    display: inline-block;
+    margin-left: 4px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.4;
+    vertical-align: baseline;
+}
+.progress-label--none {
+    background: #eef1f5;
+    color: #5f6368;
+}
+.progress-label--partial {
+    background: #fef7e0;
+    color: #9a6700;
+}
+.progress-label--done {
+    background: #e6f4ea;
+    color: #137333;
+}
+
+/* Target progress chips in detail */
+.progress-targets li { margin: 4px 0; }
+.target-chip {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+.target-chip--pending { background:#f9ab00; }
+.target-chip--done { background:#34a853; }
+.target-status { font-size: 12px; margin-left: 6px; color:#5f6368; }
+.target-status.target-chip--done { color:#137333; }
+.target-status.target-chip--pending { color:#9a6700; }
+
 .email-labels {
     display: flex;
     gap: 4px;
