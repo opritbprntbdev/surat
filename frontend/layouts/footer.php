@@ -11,10 +11,11 @@ if (!isset($base_url)) {
     // Tetapkan base API absolut agar panggilan fetch konsisten di semua halaman
     window.API_BASE = '/surat/backend/api';
 </script>
-<script src="<?php echo $base_url; ?>assets/js/utils.js"></script>
-<script src="<?php echo $base_url; ?>assets/js/api.js"></script>
-<script src="<?php echo $base_url; ?>assets/js/components.js"></script>
-<script src="<?php echo $base_url; ?>assets/js/main.js"></script>
+<?php $v = '20251029'; ?>
+<script src="<?php echo $base_url; ?>assets/js/utils.js?v=<?php echo $v; ?>"></script>
+<script src="<?php echo $base_url; ?>assets/js/api.js?v=<?php echo $v; ?>"></script>
+<script src="<?php echo $base_url; ?>assets/js/components.js?v=<?php echo $v; ?>"></script>
+<script src="<?php echo $base_url; ?>assets/js/main.js?v=<?php echo $v; ?>"></script>
 </body>
 
 </html>

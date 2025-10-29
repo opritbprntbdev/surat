@@ -11,7 +11,9 @@ body {
   background-color: #ffffff;
   color: #202124;
   line-height: 1.5;
-  overflow: hidden;
+  /* Allow page to scroll (especially on mobile). Prevent horizontal overflow only. */
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* Icons */
@@ -247,6 +249,15 @@ body {
   max-width: 720px;
 }
 
+/* Mobile tweaks to make header and search full-width */
+@media (max-width: 767px) {
+  /* Allow page to grow and use body scroll on small screens */
+  .gmail-container { height: auto; min-height: 100vh; }
+  .header { padding: 6px; }
+  .header-center { max-width: none; margin: 0 8px; }
+  .search-container { max-width: none; }
+}
+
 .search-icon {
   position: absolute;
   left: 12px;
@@ -299,6 +310,14 @@ body {
   padding: 4px 8px;
   border: 1px solid #dadce0;
   border-radius: 6px;
+}
+
+/* Mobile adjustments to avoid horizontal scroll in pager */
+@media (max-width: 767px) {
+  .pager { flex-wrap: wrap; padding: 6px 8px; gap: 6px; }
+  .pager .info { flex: 1 1 100%; margin-left: 0; }
+  .pager label { margin-left: 0 !important; font-size: 12px; }
+  .pager .page-size { padding: 2px 6px; }
 }
 
 .search-input:focus {
@@ -488,11 +507,29 @@ body {
   opacity: 0.5;
 }
 
+/* Close button (X) for detail header - desktop */
+.email-detail-header { position: relative; }
+.detail-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  padding: 6px;
+  border: none;
+  background: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #5f6368;
+}
+.detail-close-btn:hover { background: #f1f3f4; }
+@media (max-width: 767px) { .detail-close-btn { display: none; } }
+
 /* Mobile responsive for email panes */
 @media (max-width: 767px) {
   .email-content {
     position: relative;
     display: block;
+    /* Let the page/body handle scrolling on mobile instead of clipping */
+    overflow: visible;
   }
   .email-list {
     width: 100%;
@@ -500,7 +537,7 @@ body {
     border-right: none;
   }
   .email-item {
-    padding: 8px 12px;
+    padding: 8px 10px;
   }
   .email-content-wrapper {
     gap: 8px;
@@ -532,12 +569,16 @@ body {
     font-size: 13px;
     line-height: 1.3;
     margin-top: 2px;
+    word-break: break-word;
+    overflow-wrap: anywhere;
   }
   .email-preview {
     font-size: 12px;
     color: #5f6368;
     line-height: 1.3;
     margin-top: 2px;
+    word-break: break-word;
+    overflow-wrap: anywhere;
   }
   .email-star {
     transform: scale(0.9);
@@ -559,11 +600,11 @@ body {
 
   /* Compact typography and spacing in detail for small screens */
   .email-detail-content {
-    padding: 12px;
+    padding: 10px;
     font-size: 14px;
   }
   .email-detail-header {
-    padding: 8px 12px 6px;
+    padding: 6px 10px 6px;
   }
   .email-detail-subject {
     font-size: 16px;
@@ -630,8 +671,8 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    margin-right: 8px;
-    padding: 6px 10px;
+    margin-right: 6px;
+    padding: 5px 9px;
     border: 1px solid #dadce0;
     background: #fff;
     color: #3c4043;
@@ -968,6 +1009,7 @@ a:hover {
 /* ===== Tracking Timeline Styles ===== */
 .tracking-detail { padding: 16px; }
 .tracking-header { margin-bottom: 12px; }
+.tracking-header { position: relative; }
 .tracking-subject { margin: 0 0 4px; font-size: 18px; line-height: 1.35; }
 .tracking-meta { color: #5f6368; font-size: 13px; }
 

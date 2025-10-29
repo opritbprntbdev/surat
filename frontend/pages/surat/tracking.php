@@ -2,6 +2,14 @@
 <?php require_once __DIR__ . '/../../layouts/sidebar.php'; ?>
 
 <main class="main-content">
+    <style>
+    /* Tracking page: pastikan hanya jejak/timeline yang terlihat kalau komponen detail penuh ter-render. */
+    .email-detail .email-detail-actions,
+    .email-detail .preview-controls,
+    .email-detail .letter-page-wrapper {
+        display: none !important;
+    }
+    </style>
     <header class="header">
         <div class="header-left">
             <button id="mobile-menu-btn" class="mobile-menu-btn" title="Menu">
@@ -17,16 +25,7 @@
                 </svg>
                 <input type="text" id="page-search-input" placeholder="Cari surat (perihal/nomor/status) untuk tracking..." class="search-input">
             </div>
-            <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
-                <label for="source-select" class="sr-only">Sumber</label>
-                <select id="source-select" class="page-size">
-                    <option value="inbox">Kotak Masuk</option>
-                    <option value="sent">Terkirim</option>
-                    <option value="archive">Arsip</option>
-                    <option value="starred">Berbintang</option>
-                </select>
-                <span style="font-size:12px;color:#5f6368;">Pilih sumber untuk melihat status perjalanan surat.</span>
-            </div>
+            
         </div>
         <div class="header-right">
             <div class="user-menu-container">
@@ -68,10 +67,11 @@
 
 <script>
 (function(){
+    // Tandai halaman sebagai 'tracking' agar skrip global tidak override perilaku klik
+    try { document.body.dataset.page = 'tracking'; } catch(e) {}
     const emailList = document.getElementById('email-list');
     const detailPane = document.getElementById('email-detail');
     const searchInput = document.getElementById('page-search-input');
-    const sourceSel = document.getElementById('source-select');
     if (!emailList) return;
 
     let rows = [];
@@ -81,18 +81,72 @@
         emailList.innerHTML = '';
         list.forEach((s)=>{
             const item = Components.createSuratItem(s);
-            item.addEventListener('click', async ()=>{
+            item.addEventListener('click', async (evt)=>{
+                // Hindari handler global dan navigasi lain
+                if (evt && typeof evt.stopPropagation === 'function') evt.stopPropagation();
+                if (evt && typeof evt.preventDefault === 'function') evt.preventDefault();
+                // Tampilkan overlay segera pada mobile agar terasa responsif
                 detailPane.innerHTML = Components.createLoadingState('Memuat detail...');
+                if (window.innerWidth <= 767) {
+                    detailPane.classList.add('active');
+                }
                 try{
                     const d = await API.getSuratDetail(s.id);
                     detailPane.innerHTML = '';
                     // Khusus tracking: tampilkan hanya timeline perjalanan
-                    detailPane.appendChild(Components.createTrackingDetail(d.data));
+                    const node = Components.createTrackingDetail(d.data);
+                    // Sisipkan tombol kembali kecil pada mobile
+                    if (window.innerWidth <= 767) {
+                        const header = node.querySelector('.tracking-header') || node;
+                        const backBtn = document.createElement('button');
+                        backBtn.className = 'mobile-back-btn';
+                        backBtn.innerHTML = '<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>';
+                        backBtn.addEventListener('click', ()=>{
+                            detailPane.classList.remove('active');
+                        });
+                        header.prepend(backBtn);
+                    }
+                    // Tambah tombol close (X) kecil untuk desktop/web
+                    {
+                        const header = node.querySelector('.tracking-header') || node;
+                        if (header) {
+                            const closeBtn = document.createElement('button');
+                            closeBtn.className = 'detail-close-btn';
+                            closeBtn.setAttribute('aria-label', 'Tutup detail');
+                            closeBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
+                            closeBtn.addEventListener('click', ()=>{
+                                if (window.innerWidth <= 767) {
+                                    detailPane.classList.remove('active');
+                                } else {
+                                    detailPane.innerHTML = '<div class="email-detail-placeholder"><p>Ketik kata kunci lalu pilih surat untuk melihat jejak perjalanan.</p></div>';
+                                }
+                            });
+                            header.appendChild(closeBtn);
+                        }
+                    }
+                    detailPane.appendChild(node);
                 }catch(err){
                     detailPane.innerHTML = Components.createErrorState('Gagal memuat detail', err.message, ()=>{});
                 }
             });
             emailList.appendChild(item);
+        });
+    }
+
+    // Delegasi untuk toggle bintang di halaman tracking
+    if (emailList){
+        emailList.addEventListener('click', async (e)=>{
+            const starBtn = e.target.closest && e.target.closest('.email-star');
+            if (!starBtn) return;
+            e.stopPropagation(); e.preventDefault();
+            const suratId = Number(starBtn.dataset.suratId);
+            const isStarred = starBtn.classList.contains('starred');
+            try {
+                await API.toggleStar(suratId, !isStarred);
+                starBtn.classList.toggle('starred', !isStarred);
+            } catch (err) {
+                Utils.showToast(err.message || 'Gagal memperbarui bintang', 'error');
+            }
         });
     }
 
@@ -135,14 +189,12 @@
         emailList.innerHTML = Components.createLoadingState('Memuat data tracking...');
         try{
             const q = (searchInput && searchInput.value ? searchInput.value.trim() : '');
-            const src = (sourceSel && sourceSel.value) || 'inbox';
             const params = { q, page, page_size: pageSize };
-            if (src === 'sent' || src === 'archive' || src === 'starred') params.box = src;
             const resp = await API.getSuratList(params);
             rows = resp.data?.data || [];
             total = Number(resp.data?.total || 0);
             if (!rows.length){
-                emailList.innerHTML = Components.createEmptyState('Tidak ada hasil', 'Ubah kata kunci atau sumber data.');
+                emailList.innerHTML = Components.createEmptyState('Tidak ada hasil', 'Ubah kata kunci.');
                 renderPager();
                 return;
             }
@@ -157,9 +209,7 @@
         const deb = Utils.debounce(()=>{ page = 1; load(); }, 200);
         ['input','keyup','change'].forEach(evt => searchInput.addEventListener(evt, deb));
     }
-    if (sourceSel){
-        sourceSel.addEventListener('change', ()=>{ page = 1; load(); });
-    }
+    // no source selector for now
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load); else load();
 })();

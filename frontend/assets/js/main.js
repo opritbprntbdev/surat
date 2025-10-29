@@ -28,7 +28,9 @@ const App = {
 
   bindEvents() {
     const emailList = Utils.$("#email-list");
-    if (emailList) {
+    const isTrackingPage =
+      document.body && document.body.dataset && document.body.dataset.page === "tracking";
+    if (emailList && !isTrackingPage) {
       emailList.addEventListener("click", (e) => {
         // Toggle star without opening detail
         const starBtn = e.target.closest && e.target.closest(".email-star");
@@ -252,9 +254,13 @@ const App = {
 
     const detailPane = Utils.$("#email-detail");
     if (!detailPane) return;
+    // Tampilkan overlay (mobile) sesegera mungkin agar terasa responsif
     detailPane.innerHTML = Components.createLoadingState(
       "Memuat detail surat..."
     );
+    if (window.innerWidth <= 767) {
+      detailPane.classList.add("active");
+    }
 
     try {
       const response = await API.getSuratDetail(suratId);
@@ -274,7 +280,29 @@ const App = {
           });
           header.prepend(backBtn);
         }
-        detailPane.classList.add("active");
+      }
+      // Tambah tombol close (X) kecil untuk desktop/web
+      {
+        const header = content.querySelector(".email-detail-header");
+        if (header) {
+          const closeBtn = document.createElement("button");
+          closeBtn.className = "detail-close-btn";
+          closeBtn.setAttribute("aria-label", "Tutup detail");
+          closeBtn.innerHTML =
+            '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
+          closeBtn.addEventListener("click", () => {
+            if (window.innerWidth <= 767) {
+              detailPane.classList.remove("active");
+            } else {
+              detailPane.innerHTML = '<div class="email-detail-placeholder"><p>Pilih surat untuk dibaca</p></div>';
+              if (App && App.state) {
+                App.state.currentSuratId = null;
+                if (typeof App.updateSelectedUI === "function") App.updateSelectedUI();
+              }
+            }
+          });
+          header.appendChild(closeBtn);
+        }
       }
       detailPane.appendChild(content);
 
@@ -664,6 +692,37 @@ document.addEventListener("DOMContentLoaded", () => {
   const mobileBtn = document.getElementById("mobile-menu-btn");
   let overlayEl = null;
 
+  function closeDetailOverlayIfOpen() {
+    const detail = document.getElementById("email-detail");
+    if (detail && detail.classList && detail.classList.contains("active")) {
+      detail.classList.remove("active");
+      return true;
+    }
+    return false;
+  }
+
+  function clearDetailPaneDesktopIfAny() {
+    const detail = document.getElementById("email-detail");
+    if (!detail) return false;
+    // If there's meaningful content (not already placeholder), reset it
+    const pageType = (document.body && document.body.dataset && document.body.dataset.page) || "";
+    const placeholder = pageType === "tracking"
+      ? '<div class="email-detail-placeholder"><p>Ketik kata kunci lalu pilih surat untuk melihat jejak perjalanan.</p></div>'
+      : '<div class="email-detail-placeholder"><p>Pilih surat untuk dibaca</p></div>';
+    // If current content already equals placeholder, no need to reset
+    if (detail.innerHTML && detail.innerHTML.indexOf("email-detail-placeholder") !== -1) {
+      // already placeholder
+    } else {
+      detail.innerHTML = placeholder;
+    }
+    // Clear selected state in list
+    if (window.App && App.state) {
+      App.state.currentSuratId = null;
+      if (typeof App.updateSelectedUI === "function") App.updateSelectedUI();
+    }
+    return true;
+  }
+
   function openSidebar() {
     if (!sidebar) return;
     sidebar.classList.add("open");
@@ -693,6 +752,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Close on ESC
   window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeSidebar();
+    if (e.key === "Escape") {
+      // Prioritaskan menutup panel baca (overlay) di mobile
+      if (closeDetailOverlayIfOpen()) {
+        e.preventDefault();
+        return;
+      }
+      // Di desktop: reset panel kanan ke placeholder
+      if (clearDetailPaneDesktopIfAny()) {
+        e.preventDefault();
+        return;
+      }
+      // Jika tidak ada overlay detail yang aktif, tutup sidebar bila terbuka
+      closeSidebar();
+    }
   });
 });

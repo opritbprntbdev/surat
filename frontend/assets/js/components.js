@@ -20,7 +20,7 @@ const Components = {
                           surat.pengirim_nama
                         )}</div>
                         <div class="email-date">${Utils.formatDateTimeLabel(
-                          surat.tanggal_surat
+                          surat.last_activity_at || surat.tanggal_surat
                         )}</div>
                     </div>
                     <div class="email-subject">${Utils.escapeHtml(
@@ -69,6 +69,19 @@ const Components = {
                         return (
                           " • " + Utils.escapeHtml(Utils.truncateText(text, 60))
                         );
+                      })()}
+                      ${(() => {
+                        const cnt = Number(surat.current_holder_count || 0);
+                        if (!cnt) return "";
+                        const namesStr = String(surat.current_holders || "");
+                        const names = namesStr
+                          .split(",")
+                          .map((n) => n.trim())
+                          .filter(Boolean);
+                        let label = "";
+                        if (names.length <= 2) label = names.join(", ");
+                        else label = names.slice(0, 2).join(", ") + " +" + (names.length - 2);
+                        return " • Pemegang: " + Utils.escapeHtml(label);
                       })()}
                     </div>
                 </div>
