@@ -1623,3 +1623,96 @@ body.modal-open {
     /* Prevent accidental horizontal scrolling from any leftover inline widths */
     .email-detail_body { overflow-x: hidden; }
 }
+
+    /* ====== Dark Theme overrides (prefers-color-scheme) ====== */
+    @media (prefers-color-scheme: dark) {
+        /* General borders/backgrounds in list */
+        .email-item { border-bottom-color: #2a2c30; }
+        .email-item:hover { background-color: #222325; }
+        .email-item.selected { background-color: #263238; }
+        .email-item.unread { background: transparent; }
+
+        /* Text colors */
+        .email-from { color: #e8eaed; }
+        .email-subject { color: #e8eaed; }
+        .email-preview, .email-date { color: #b0b3b8; }
+        .email-item.unread .email-from,
+        .email-item.unread .email-subject { color: #e8eaed; }
+
+        /* Icons */
+        .email-star { color: #cfd3d7; }
+        .email-star:hover { background-color: #2a2c2f; }
+        .email-star.starred { color: #fbbc04; }
+
+        /* Detail panel */
+        .email-detail-header { border-bottom-color: #2a2c30; }
+        .preview-controls { background-color: #1f1f1f; border-bottom-color: #2a2c30; }
+        .zoom-controls label { color: #b0b3b8; }
+        #zoom-select { border-color: #3c4043; background: #2a2c30; color: #e8eaed; }
+        .email-detail-from-info h4 { color: #e8eaed; }
+        .email-detail-from-info p { color: #b0b3b8; }
+        .email-detail-date { color: #b0b3b8; }
+        .email-detail-to { color: #b0b3b8; }
+        .email-detail-to strong { color: #e8eaed; }
+        .email-detail-body { color: #e8eaed; }
+        .letter-page-wrapper { background-color: #161719; }
+        .email-detail-body .letter-content { color: #e8eaed; }
+
+        /* Attachments */
+        .email-attachments { border-top-color: #2a2c30; background-color: #1f1f1f; }
+        .email-attachment { background-color: #1f1f1f; border-color: #2a2c30; }
+        .email-attachment:hover { border-color: #8ab4f8; }
+        .email-attachment-name { color: #e8eaed; }
+        .email-attachment-size { color: #b0b3b8; }
+        .email-attachment-icon { color: #cfd3d7; }
+
+        /* Mobile detail header */
+        .mobile-email-detail-header { background-color: #1f1f1f; border-bottom-color: #2a2c30; }
+        .mobile-back-btn { color: #cfd3d7; }
+        .mobile-back-btn:hover { background-color: #2a2c2f; }
+
+        /* Cards */
+        .card { background: #1f1f1f; }
+        .card-header { background-color: #171819; border-bottom-color: #2a2c30; }
+
+        /* Buttons */
+        .btn-secondary { background-color: #2a2c30; color: #e8eaed; border: 1px solid #3c4043; }
+        .btn-secondary:hover { background-color: #33363a; }
+        .btn-outline { color: #e8eaed; border-color: #3c4043; }
+        .btn-outline:hover { background-color: #2a2c30; }
+        .btn { color: inherit; }
+
+        /* Pagination */
+        .pagination-btn { background-color: #2a2c30; color: #e8eaed; border-color: #3c4043; }
+        .pagination-btn:hover { background-color: #33363a; }
+        .pagination-btn.active { background-color: #3b82f6; color: #121212; border-color: #3b82f6; }
+        .pagination-info { color: #b0b3b8; }
+
+        /* Tables (UM management pages) */
+        .table th { background-color: #171819; color: #e8eaed; border-bottom-color: #2a2c30; }
+        .table td { border-bottom-color: #2a2c30; }
+        .table tbody tr:hover { background-color: #222325; }
+
+        /* Forms */
+        .form-group label { color: #e8eaed; }
+        .form-text { color: #b0b3b8; }
+        .form-control, .search-box input, .filter-options select {
+            background-color: #2a2c30; color: #e8eaed; border-color: #3c4043;
+        }
+        .form-control:focus, .search-box input:focus { border-color: #8ab4f8; box-shadow: none; }
+        .search-icon { color: #9aa0a6; }
+
+        /* Modals */
+        .modal-content { background-color: #1f1f1f; }
+        .modal-header { border-bottom-color: #2a2c30; }
+        .modal-footer { border-top-color: #2a2c30; }
+        .close { color: #cfd3d7; }
+        .close:hover { background-color: #2a2c2f; }
+
+        /* Badges & chips */
+        .badge-primary { background-color: rgba(138,180,248,0.2); color: #8ab4f8; }
+        .badge-secondary { background-color: #2a2c2f; color: #cfd3d7; }
+        .progress-label--none { background: #2a2c2f; color: #b0b3b8; }
+        .progress-label--partial { background: #4a3b05; color: #ffd54f; }
+        .progress-label--done { background: #1b2a1d; color: #8bc34a; }
+    }
