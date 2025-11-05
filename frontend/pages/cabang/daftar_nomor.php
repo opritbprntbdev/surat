@@ -146,10 +146,19 @@ if (!in_array($role, ['CABANG', 'ADMIN']) || $cabangId <= 0) {
             const response = await fetch(`../../../backend/api/nomor_surat.php?${params}`);
             const result = await response.json();
 
+            console.log('API Response:', result);
+
             if (result.success) {
-                renderTable(result.data.logs);
-                currentPage = result.data.currentPage;
-                totalPages = result.data.totalPages;
+                const logs = result.data.data || [];
+                const total = result.data.total || 0;
+                
+                renderTable(logs);
+                
+                // Calculate pagination
+                const pageSize = 50;
+                totalPages = Math.ceil(total / pageSize);
+                currentPage = page;
+                
                 updatePagination();
             } else {
                 showError(result.message || 'Gagal memuat data');
@@ -198,8 +207,8 @@ if (!in_array($role, ['CABANG', 'ADMIN']) || $cabangId <= 0) {
             });
 
             let suratLink = '-';
-            if (log.surat_id && log.perihal) {
-                suratLink = `<a href="../surat/detail.php?id=${log.surat_id}" style="color:#1a73e8; text-decoration:none;" target="_blank" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${log.perihal}</a>`;
+            if (log.surat_id && log.surat_perihal) {
+                suratLink = `<a href="../surat/surat_detail.php?id=${log.surat_id}" style="color:#1a73e8; text-decoration:none;" target="_blank" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${log.surat_perihal}</a>`;
             }
 
             let aksi = '-';
