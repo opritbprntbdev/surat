@@ -2,6 +2,7 @@
 session_start();
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../function/log_helper.php';
 
 if (!isset($_SESSION['user_id'])) {
     errorResponse('Akses ditolak.', 401);
@@ -22,6 +23,7 @@ try {
     $stmt = $db->prepare("INSERT IGNORE INTO surat_read (surat_id, user_id, read_at) VALUES (?, ?, NOW())");
     $stmt->bind_param('ii', $suratId, $userId);
     $stmt->execute();
+    LogHelper::add($userId, 'READ_SURAT', 'surat_id=' . $suratId);
     successResponse(['surat_id' => $suratId, 'read' => true]);
 } catch (Throwable $e) {
     error_log('Error read.php: ' . $e->getMessage());

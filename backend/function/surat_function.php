@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/log_helper.php';
+require_once __DIR__ . '/numbering.php';
 
 class SuratFunctions
 {
@@ -90,8 +92,17 @@ class SuratFunctions
         if ($userId) {
             if ($box === 'sent') {
                 // Surat terkirim oleh user ini
-                $where = " WHERE s.pengirim_id = ? ";
-                $params = [$userId];
+                // Jika tracking mode dan bukan UMUM/ADMIN, filter hanya surat yang user terlibat
+                if ($tracking && !in_array($role, ['UMUM', 'ADMIN'])) {
+                    // Filter: surat yang pernah user terima ATAU user buat sendiri
+                    $where = " WHERE (s.pengirim_id = ? OR EXISTS(SELECT 1 FROM surat_penerima spx WHERE spx.surat_id=s.id AND spx.user_id=?)) ";
+                    $params = [$userId, $userId];
+                } else {
+                    // UMUM/ADMIN atau mode biasa (sent): semua surat yang dikirim user ini
+                    $where = " WHERE s.pengirim_id = ? ";
+                    $params = [$userId];
+                }
+                
                 if ($facet !== 'ALL') {
                     $where .= " AND UPPER(COALESCE(pengirim.role,'')) = ? ";
                     $params[] = $facet;
@@ -760,7 +771,7 @@ class SuratFunctions
      * Create new surat: default route to UMUM group inbox.
      * @return int Inserted surat id
      */
-    public function createSurat(int $pengirimId, string $perihal, ?string $isiSurat = null): int
+    public function createSurat(int $pengirimId, string $perihal, ?string $isiSurat = null, ?string $nomorSurat = null, ?string $jenisSurat = null): int
     {
         if ($perihal === '') {
             throw new InvalidArgumentException('Perihal wajib diisi');
@@ -773,13 +784,21 @@ class SuratFunctions
             $isiSurat = '';
         }
 
-        // Minimal numbering: use temporary draft number; UMUM can renumber later
-        $nomorSurat = 'DRAFT-' . date('YmdHis') . '-' . $pengirimId;
+        // Jika cabang sudah berikan nomor surat, gunakan itu (permanen!)
+        // Jika tidak, gunakan DRAFT number sementara (bisa di-renumber UMUM nanti)
+        if (empty($nomorSurat)) {
+            $nomorSurat = 'DRAFT-' . date('YmdHis') . '-' . $pengirimId;
+        }
+        
+        // Tentukan jenis surat (default KELUAR untuk backward compatibility)
+        $jenis = !empty($jenisSurat) && in_array(strtoupper($jenisSurat), ['MASUK', 'KELUAR']) 
+            ? strtoupper($jenisSurat) 
+            : 'KELUAR';
 
         $sql = "INSERT INTO surat (jenis_surat, nomor_surat, nomor_urut, tanggal_surat, perihal, isi_surat, template_id, pengirim_id, penerima_id, status, file_lampiran)
-                VALUES ('KELUAR', ?, 0, CURDATE(), ?, ?, NULL, ?, 0, 'MENUNGGU_TINDAKAN_UMUM', NULL)";
+                VALUES (?, ?, 0, NOW(), ?, ?, NULL, ?, 0, 'MENUNGGU_TINDAKAN_UMUM', NULL)";
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param('sssi', $nomorSurat, $perihal, $isiSurat, $pengirimId);
+        $stmt->bind_param('ssssi', $jenis, $nomorSurat, $perihal, $isiSurat, $pengirimId);
         $stmt->execute();
         $newId = $stmt->insert_id;
 
@@ -790,6 +809,9 @@ class SuratFunctions
             $ins->bind_param('ii', $newId, $umumId);
             $ins->execute();
         }
+
+        // Log aktivitas pembuatan surat
+        LogHelper::add($pengirimId, 'CREATE_SURAT', 'surat_id=' . $newId . '; perihal=' . $perihal . '; nomor=' . $nomorSurat);
 
         return $newId;
     }
@@ -882,12 +904,15 @@ class SuratFunctions
             error_log('requestDisposition: gagal update status surat_id=' . $suratId . ' => ' . $e->getMessage());
         }
 
-        // Log opsional
+        // Log ke file opsional
         try {
             $line = date('c') . "\treq_dispo\tsurat_id=$suratId\tto_user=$targetUserId\tby=$byUserId\tnote=" . str_replace(["\n", "\t"], ' ', (string) $note) . "\n";
             @file_put_contents(__DIR__ . '/../logs/disposisi.log', $line, FILE_APPEND);
         } catch (\Throwable $e) {
         }
+
+        // Log ke DB
+        LogHelper::add($byUserId, 'REQUEST_DISPOSISI', 'surat_id=' . $suratId . '; to_user=' . $targetUserId . '; note=' . (string)$note);
 
         return true;
     }
@@ -941,6 +966,8 @@ class SuratFunctions
             @file_put_contents(__DIR__ . '/../logs/disposisi.log', $line, FILE_APPEND);
         } catch (\Throwable $e) {
         }
+        // Log ke DB
+        LogHelper::add($byUserId, 'REQUEST_DISPOSISI_MULTI', 'surat_id=' . $suratId . '; to_users=' . implode(',', $ids) . '; note=' . (string)$note);
         return true;
     }
 
@@ -971,6 +998,9 @@ class SuratFunctions
         } catch (\Throwable $e) {
             error_log('submitDisposition: gagal update status surat_id=' . $suratId . ' => ' . $e->getMessage());
         }
+
+        // Log ke DB
+        LogHelper::add($byUserId, 'SUBMIT_DISPOSISI', 'surat_id=' . $suratId . '; text_len=' . strlen($text));
         return true;
     }
 
@@ -985,12 +1015,35 @@ class SuratFunctions
         foreach ($targetUserIds as $uid) {
             $this->addActiveForUser($suratId, (int) $uid);
         }
+        // Jika nomor surat masih draft/0, tetapkan nomor final berbasis config divisi pengirim
+        try {
+            $row = Database::fetchOne("SELECT s.nomor_surat, s.nomor_urut, s.tanggal_surat, u.divisi_id FROM surat s JOIN user u ON s.pengirim_id=u.id WHERE s.id=? LIMIT 1", [$suratId]);
+            if ($row) {
+                $nomorSurat = (string)($row['nomor_surat'] ?? '');
+                $nomorUrut = (int)($row['nomor_urut'] ?? 0);
+                $divisiId = (int)($row['divisi_id'] ?? 0);
+                if ($divisiId > 0 && ($nomorUrut === 0 || str_starts_with($nomorSurat, 'DRAFT-'))) {
+                    $gen = Numbering::next($divisiId, (string)$row['tanggal_surat']);
+                    $upd = $this->db->prepare("UPDATE surat SET nomor_surat=?, nomor_urut=?, updated_at=NOW() WHERE id=?");
+                    $upd->bind_param('sii', $gen['nomor'], $gen['urut'], $suratId);
+                    $upd->execute();
+                    // Log penomoran
+                    LogHelper::add($byUmumUserId, 'ASSIGN_NOMOR_SURAT', 'surat_id=' . $suratId . '; nomor=' . $gen['nomor']);
+                }
+            }
+        } catch (\Throwable $e) {
+            error_log('finalDistribution: numbering failed for surat_id=' . $suratId . ' => ' . $e->getMessage());
+        }
+
         // Update status surat akhir
         try {
             $this->db->query("UPDATE surat SET status='SELESAI' WHERE id=" . (int) $suratId);
         } catch (\Throwable $e) {
             error_log('finalDistribution: gagal update status surat_id=' . $suratId . ' => ' . $e->getMessage());
         }
+
+        // Log ke DB
+        LogHelper::add($byUmumUserId, 'FINAL_DISTRIBUTION', 'surat_id=' . $suratId . '; targets=' . implode(',', array_map('intval', $targetUserIds)));
         return true;
     }
 }

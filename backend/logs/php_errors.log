@@ -42,3 +42,403 @@ Stack trace:
 [28-Oct-2025 14:54:32 Asia/Jakarta] Error di disposisi.php: Data truncated for column 'status' at row 1
 [28-Oct-2025 14:54:36 Asia/Jakarta] Error di disposisi.php: Data truncated for column 'status' at row 1
 [28-Oct-2025 16:08:13 Asia/Jakarta] Error di disposisi.php: Data truncated for column 'status' at row 1
+[05-Nov-2025 10:19:25 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:19:25 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:19:25 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:19:25 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:19:25 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:19:25 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:19:25 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:19:25 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:19:25 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:19:25 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:19:48 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:19:48 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:19:48 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:19:48 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:19:48 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:19:48 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:19:48 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:19:48 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:19:48 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:19:48 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:19:55 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:19:55 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:19:55 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:19:55 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:19:55 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:19:56 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:19:56 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:19:56 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:19:56 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:19:56 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:20:05 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:20:05 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:20:05 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:20:05 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:20:05 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:20:05 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:20:05 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:20:05 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:20:05 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:20:05 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:20:33 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:20:33 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:20:33 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:20:33 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:20:33 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:20:33 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:20:33 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:20:33 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:20:33 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:20:33 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:20:38 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:20:38 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:20:38 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:20:38 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:20:38 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:20:38 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:20:38 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:20:38 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:20:38 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:20:38 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:20:43 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:20:43 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:20:43 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:20:43 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:20:43 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:20:43 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:20:43 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:20:43 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:20:43 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:20:43 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:20:43 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:20:43 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:20:43 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:20:43 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:20:43 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:20:44 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:20:44 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:20:44 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:20:44 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:20:44 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:20:44 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:20:44 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:20:44 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:20:44 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:20:44 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:20:44 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:20:44 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:20:44 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:20:44 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:20:44 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:20:45 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:20:45 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:20:45 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:20:45 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:20:45 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:20:45 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:20:45 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:20:45 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:20:45 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:20:45 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:40 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:40 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:40 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:40 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:40 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:40 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:40 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:40 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:40 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:40 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:41 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:41 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:41 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:41 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:41 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:41 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:41 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:41 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:41 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:41 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:41 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:41 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:41 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:41 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:41 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:42 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:42 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:42 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:42 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:42 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:42 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:42 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:42 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:42 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:42 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:42 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:42 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:42 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:42 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:42 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:43 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:44 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:45 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:45 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:45 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:45 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:45 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:45 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:45 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:45 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:45 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:45 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:45 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:45 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:45 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:45 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:45 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Fatal error:  Cannot declare class Database, because the name is already in use in C:\wamp64\www\surat\backend\config\database_wamp.php on line 7
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\backend\api\surat.php:0
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   2. require_once() C:\wamp64\www\surat\backend\api\surat.php:5
+[05-Nov-2025 10:22:46 Asia/Makassar] PHP   3. require_once() C:\wamp64\www\surat\backend\function\cabang_numbering.php:2
+[05-Nov-2025 10:30:52 Asia/Makassar] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\wamp64\www\surat\frontend\layouts\header.php on line 2
+[05-Nov-2025 10:30:52 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:30:52 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:0
+[05-Nov-2025 10:30:52 Asia/Makassar] PHP   2. include() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:175
+[05-Nov-2025 10:30:52 Asia/Makassar] PHP   3. session_start() C:\wamp64\www\surat\frontend\layouts\header.php:2
+[05-Nov-2025 10:31:06 Asia/Makassar] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\wamp64\www\surat\frontend\layouts\header.php on line 2
+[05-Nov-2025 10:31:06 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:31:06 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:0
+[05-Nov-2025 10:31:06 Asia/Makassar] PHP   2. include() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:175
+[05-Nov-2025 10:31:06 Asia/Makassar] PHP   3. session_start() C:\wamp64\www\surat\frontend\layouts\header.php:2
+[05-Nov-2025 10:31:57 Asia/Makassar] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\wamp64\www\surat\frontend\layouts\header.php on line 2
+[05-Nov-2025 10:31:57 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:31:57 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:0
+[05-Nov-2025 10:31:57 Asia/Makassar] PHP   2. include() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:175
+[05-Nov-2025 10:31:57 Asia/Makassar] PHP   3. session_start() C:\wamp64\www\surat\frontend\layouts\header.php:2
+[05-Nov-2025 10:34:36 Asia/Makassar] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\wamp64\www\surat\frontend\layouts\header.php on line 2
+[05-Nov-2025 10:34:36 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:34:36 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:0
+[05-Nov-2025 10:34:36 Asia/Makassar] PHP   2. include() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:34
+[05-Nov-2025 10:34:36 Asia/Makassar] PHP   3. session_start() C:\wamp64\www\surat\frontend\layouts\header.php:2
+[05-Nov-2025 10:36:11 Asia/Makassar] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\wamp64\www\surat\frontend\layouts\header.php on line 2
+[05-Nov-2025 10:36:11 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:36:11 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:0
+[05-Nov-2025 10:36:11 Asia/Makassar] PHP   2. include() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:34
+[05-Nov-2025 10:36:11 Asia/Makassar] PHP   3. session_start() C:\wamp64\www\surat\frontend\layouts\header.php:2
+[05-Nov-2025 10:36:11 Asia/Makassar] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\wamp64\www\surat\frontend\layouts\header.php on line 2
+[05-Nov-2025 10:36:11 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:36:11 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:0
+[05-Nov-2025 10:36:11 Asia/Makassar] PHP   2. include() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:34
+[05-Nov-2025 10:36:11 Asia/Makassar] PHP   3. session_start() C:\wamp64\www\surat\frontend\layouts\header.php:2
+[05-Nov-2025 10:36:12 Asia/Makassar] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\wamp64\www\surat\frontend\layouts\header.php on line 2
+[05-Nov-2025 10:36:12 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:36:12 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:0
+[05-Nov-2025 10:36:12 Asia/Makassar] PHP   2. include() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:34
+[05-Nov-2025 10:36:12 Asia/Makassar] PHP   3. session_start() C:\wamp64\www\surat\frontend\layouts\header.php:2
+[05-Nov-2025 10:36:12 Asia/Makassar] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\wamp64\www\surat\frontend\layouts\header.php on line 2
+[05-Nov-2025 10:36:12 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:36:12 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:0
+[05-Nov-2025 10:36:12 Asia/Makassar] PHP   2. include() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:34
+[05-Nov-2025 10:36:12 Asia/Makassar] PHP   3. session_start() C:\wamp64\www\surat\frontend\layouts\header.php:2
+[05-Nov-2025 10:36:22 Asia/Makassar] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\wamp64\www\surat\frontend\layouts\header.php on line 2
+[05-Nov-2025 10:36:22 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:36:22 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:0
+[05-Nov-2025 10:36:22 Asia/Makassar] PHP   2. include() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:34
+[05-Nov-2025 10:36:22 Asia/Makassar] PHP   3. session_start() C:\wamp64\www\surat\frontend\layouts\header.php:2
+[05-Nov-2025 10:36:22 Asia/Makassar] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\wamp64\www\surat\frontend\layouts\header.php on line 2
+[05-Nov-2025 10:36:22 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:36:22 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:0
+[05-Nov-2025 10:36:22 Asia/Makassar] PHP   2. include() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:34
+[05-Nov-2025 10:36:22 Asia/Makassar] PHP   3. session_start() C:\wamp64\www\surat\frontend\layouts\header.php:2
+[05-Nov-2025 10:36:22 Asia/Makassar] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\wamp64\www\surat\frontend\layouts\header.php on line 2
+[05-Nov-2025 10:36:22 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:36:22 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:0
+[05-Nov-2025 10:36:22 Asia/Makassar] PHP   2. include() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:34
+[05-Nov-2025 10:36:22 Asia/Makassar] PHP   3. session_start() C:\wamp64\www\surat\frontend\layouts\header.php:2
+[05-Nov-2025 10:36:23 Asia/Makassar] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\wamp64\www\surat\frontend\layouts\header.php on line 2
+[05-Nov-2025 10:36:23 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:36:23 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:0
+[05-Nov-2025 10:36:23 Asia/Makassar] PHP   2. include() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:34
+[05-Nov-2025 10:36:23 Asia/Makassar] PHP   3. session_start() C:\wamp64\www\surat\frontend\layouts\header.php:2
+[05-Nov-2025 10:36:23 Asia/Makassar] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\wamp64\www\surat\frontend\layouts\header.php on line 2
+[05-Nov-2025 10:36:23 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:36:23 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:0
+[05-Nov-2025 10:36:23 Asia/Makassar] PHP   2. include() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:34
+[05-Nov-2025 10:36:23 Asia/Makassar] PHP   3. session_start() C:\wamp64\www\surat\frontend\layouts\header.php:2
+[05-Nov-2025 10:36:28 Asia/Makassar] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\wamp64\www\surat\frontend\layouts\header.php on line 2
+[05-Nov-2025 10:36:28 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:36:28 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:0
+[05-Nov-2025 10:36:28 Asia/Makassar] PHP   2. include() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:34
+[05-Nov-2025 10:36:28 Asia/Makassar] PHP   3. session_start() C:\wamp64\www\surat\frontend\layouts\header.php:2
+[05-Nov-2025 10:36:28 Asia/Makassar] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\wamp64\www\surat\frontend\layouts\header.php on line 2
+[05-Nov-2025 10:36:28 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:36:28 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:0
+[05-Nov-2025 10:36:28 Asia/Makassar] PHP   2. include() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:34
+[05-Nov-2025 10:36:28 Asia/Makassar] PHP   3. session_start() C:\wamp64\www\surat\frontend\layouts\header.php:2
+[05-Nov-2025 10:37:39 Asia/Makassar] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\wamp64\www\surat\frontend\layouts\header.php on line 2
+[05-Nov-2025 10:37:39 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:37:39 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:0
+[05-Nov-2025 10:37:39 Asia/Makassar] PHP   2. include() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:34
+[05-Nov-2025 10:37:39 Asia/Makassar] PHP   3. session_start() C:\wamp64\www\surat\frontend\layouts\header.php:2
+[05-Nov-2025 10:37:40 Asia/Makassar] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\wamp64\www\surat\frontend\layouts\header.php on line 2
+[05-Nov-2025 10:37:40 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:37:40 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:0
+[05-Nov-2025 10:37:40 Asia/Makassar] PHP   2. include() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:34
+[05-Nov-2025 10:37:40 Asia/Makassar] PHP   3. session_start() C:\wamp64\www\surat\frontend\layouts\header.php:2
+[05-Nov-2025 10:37:40 Asia/Makassar] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\wamp64\www\surat\frontend\layouts\header.php on line 2
+[05-Nov-2025 10:37:40 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:37:40 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:0
+[05-Nov-2025 10:37:40 Asia/Makassar] PHP   2. include() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:34
+[05-Nov-2025 10:37:40 Asia/Makassar] PHP   3. session_start() C:\wamp64\www\surat\frontend\layouts\header.php:2
+[05-Nov-2025 10:37:41 Asia/Makassar] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\wamp64\www\surat\frontend\layouts\header.php on line 2
+[05-Nov-2025 10:37:41 Asia/Makassar] PHP Stack trace:
+[05-Nov-2025 10:37:41 Asia/Makassar] PHP   1. {main}() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:0
+[05-Nov-2025 10:37:41 Asia/Makassar] PHP   2. include() C:\wamp64\www\surat\frontend\pages\cabang\daftar_nomor.php:34
+[05-Nov-2025 10:37:41 Asia/Makassar] PHP   3. session_start() C:\wamp64\www\surat\frontend\layouts\header.php:2

@@ -92,6 +92,18 @@ $isUmum = strtoupper($role) === 'UMUM';
                 <span>Tracking</span>
             </a>
 
+            <!-- Daftar Nomor Surat - HANYA UNTUK CABANG -->
+            <?php if ($isCabang || $isAdmin): ?>
+                <a href="<?php echo $base_url; ?>pages/cabang/daftar_nomor.php"
+                    class="nav-item <?php echo (strpos($current_path, '/pages/cabang/daftar_nomor.php') !== false) ? 'active' : ''; ?>">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <!-- List/numbers icon -->
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                    <span>Daftar Nomor Surat</span>
+                </a>
+            <?php endif; ?>
+
             <!-- User Management - PERBAIKAN DI SINI -->
             <?php if ($isAdmin): ?>
                 <a href="<?php echo $base_url; ?>pages/users/index.php"

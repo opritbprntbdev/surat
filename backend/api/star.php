@@ -2,6 +2,7 @@
 session_start();
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../function/log_helper.php';
 
 if (!isset($_SESSION['user_id'])) {
     errorResponse('Akses ditolak.', 401);
@@ -24,10 +25,12 @@ try {
         $stmt = $db->prepare("INSERT IGNORE INTO surat_star (surat_id, user_id, created_at) VALUES (?, ?, NOW())");
         $stmt->bind_param('ii', $suratId, $userId);
         $stmt->execute();
+        LogHelper::add($userId, 'STAR_ADD', 'surat_id=' . $suratId);
     } else {
         $stmt = $db->prepare("DELETE FROM surat_star WHERE surat_id=? AND user_id=?");
         $stmt->bind_param('ii', $suratId, $userId);
         $stmt->execute();
+        LogHelper::add($userId, 'STAR_REMOVE', 'surat_id=' . $suratId);
     }
     successResponse(['surat_id' => $suratId, 'starred' => $starred]);
 } catch (Throwable $e) {

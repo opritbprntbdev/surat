@@ -21,7 +21,7 @@ if ($username === '' || $password === '') {
 
 // Cek user di database surat_app, tabel user, password MD5
 $db = Database::getInstance();
-$stmt = $db->prepare("SELECT id, username, password, nama_lengkap, role, divisi_id, status FROM user WHERE username = ? AND status = 'AKTIF' LIMIT 1");
+$stmt = $db->prepare("SELECT id, username, password, nama_lengkap, role, divisi_id, cabang_id, status FROM user WHERE username = ? AND status = 'AKTIF' LIMIT 1");
 $stmt->bind_param('s', $username);
 $stmt->execute();
 $res = $stmt->get_result();
@@ -42,6 +42,7 @@ $_SESSION['username'] = $user['username'];
 $_SESSION['nama_lengkap'] = $user['nama_lengkap'];
 $_SESSION['role'] = $user['role'];
 $_SESSION['divisi_id'] = $user['divisi_id'];
+$_SESSION['cabang_id'] = $user['cabang_id']; // Load cabang_id ke session
 
 echo json_encode([
     'success' => true,
@@ -50,7 +51,8 @@ echo json_encode([
         'username' => $user['username'],
         'nama_lengkap' => $user['nama_lengkap'],
         'role' => $user['role'],
-        'divisi_id' => $user['divisi_id']
+        'divisi_id' => $user['divisi_id'],
+        'cabang_id' => $user['cabang_id']
     ]
 ]);
 ?>

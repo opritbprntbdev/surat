@@ -6,7 +6,7 @@
 
 class Database
 {
-    private static ?mysqli $instance = null;
+    private static ?Database $instance = null;
     private mysqli $connection;
 
     // Database configuration for WAMP

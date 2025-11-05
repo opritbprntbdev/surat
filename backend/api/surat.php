@@ -2,6 +2,7 @@
 session_start();
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../function/surat_function.php';
+require_once __DIR__ . '/../function/cabang_numbering.php';
 
 if (!isset($_SESSION['user_id'])) {
     errorResponse('Akses ditolak.', 401);
@@ -28,8 +29,24 @@ try {
         }
 
         $userId = (int)($_SESSION['user_id']);
+        
+        // Handle cabang numbering
+        $nomorSurat = !empty($payload['nomor_surat']) ? trim($payload['nomor_surat']) : null;
+        $jenisSurat = !empty($payload['jenis_surat']) ? trim($payload['jenis_surat']) : null;
+        $logId = isset($payload['log_id']) ? (int)$payload['log_id'] : 0;
 
-        $newId = $suratFunctions->createSurat($userId, $perihal, $isi);
+        // Buat surat dengan nomor dari cabang (jika ada)
+        $newId = $suratFunctions->createSurat($userId, $perihal, $isi, $nomorSurat, $jenisSurat);
+        
+        // Mark nomor as USED jika ada log_id
+        if ($logId > 0) {
+            try {
+                CabangNumbering::markUsed($logId, $newId);
+            } catch (Exception $e) {
+                error_log("Warning: Gagal mark nomor as USED untuk log_id={$logId}, surat_id={$newId}: " . $e->getMessage());
+            }
+        }
+        
         // Menggunakan successResponse yang konsisten dengan frontend
         successResponse(['id' => $newId], 'Surat berhasil dibuat dan dikirim ke UMUM');
 
